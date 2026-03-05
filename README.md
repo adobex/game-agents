@@ -1,0 +1,32 @@
+# Game Agents
+
+该项目用于规划和设计游戏开发中的各类 Agent。我们旨在通过不同类型的智能代理（Agents）来协助、增强甚至自动化游戏设计与开发流程。
+
+本项目基于“三省六部制”理念，构建了一个**制度化、可控、有审核机制**的多 Agent 协作游戏策划系统。
+
+## 目录结构
+
+- `docs/` - 存放架构设计、规划文档以及研究记录。
+  - [架构规划文档 (architecture-plan.md)](./docs/architecture-plan.md) 
+- `skills/` - **(项目共用)** 存放当前项目内跨 Agent 复用的具体业务 Skill。
+- `rules/` - **(项目共用)** 存放当前游戏项目的具体设计规则、编码标准等。
+- `agents/` - 存放具体各类 Agent 的设计草案、Prompt 模板和专有规则。
+  - **总控入口**：`taizi/` (太子)
+  - **三省大脑**：`zhongshu/` (中书省), `menxia/` (门下省), `shangshu/` (尚书省)
+  - **11司执行层**：
+    - `positioning/` (定位司)
+    - `narrative/` (叙事司)
+    - `combat/` (战斗司)
+    - `level/` (关卡司)
+    - `gameplay/` (玩法司)
+    - `systems/` (系统司)
+    - `ux/` (UX 司)
+    - `balancing/` (数值司)
+    - `monetization/` (付费司)
+    - `economy/` (经济司)
+    - `liveops/` (运营司)
+- `scripts/` - 存放用于测试或辅助运行的脚本工具。
+
+## 目标与愿景
+
+探索在游戏设计的不同阶段（如世界观构建、关卡设计、NPC行为逻辑规划、数值平衡等）如何应用各种专用的 Agent，利用意图分拣 $\rightarrow$ 方案起草 $\rightarrow$ 质量审核 $\rightarrow$ 派发调度 $\rightarrow$ 专职并行执行的工作流，大幅提升游戏设计的效率和质量。
