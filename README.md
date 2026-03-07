@@ -10,10 +10,14 @@
   - [架构规划文档 (architecture-plan.md)](./docs/architecture-plan.md)
   - [AI Tribunal 吸收记录 (ai-tribunal-integration.md)](./docs/ai-tribunal-integration.md)
   - [Agent 规格总览 (agent-spec-map.md)](./docs/agent-spec-map.md)
+  - [输出模板 (output-templates.md)](./docs/output-templates.md)
+  - [状态机协议 (workflow-state-machine.md)](./docs/workflow-state-machine.md)
+  - [运行入口 (how-to-run-game-agents.md)](./docs/how-to-run-game-agents.md)
 - `skills/` - **(项目共用)** 存放当前项目内跨 Agent 复用的具体业务 Skill。
   - 基础检索与计算：`explore.md`、`librarian.md`、`oracle.md`
   - 审查方法论：`system-audit.md`、`content-review.md`、`experience-review.md`、`balance-audit.md`、`economy-audit.md`、`monetization-audit.md`、`review-synthesis.md`
   - 业务执行 skill 已按各 Agent 能力补齐，详见 [技能索引 (skills/README.md)](./skills/README.md)
+  - 技能索引已重构为基础能力层 / 业务执行层 / 审查裁决层，便于渐进式披露
 - `rules/` - **(项目共用)** 存放当前游戏项目的具体设计规则、编码标准等。
   - 现已包含：`review-report-protocol.md`（统一审查上报协议）、`progressive-disclosure.md`（渐进式披露规则）、`agent-spec-contract.md`（Agent 规格契约）
 - `agents/` - 存放具体各类 Agent 的设计草案、Prompt 模板和专有规则。

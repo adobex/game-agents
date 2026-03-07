@@ -2,49 +2,77 @@
 
 项目内真实存在的共用 skill 索引。`agents/*/SOUL.md` 的 `Skills` 段应只引用这里或 `~/Project/Agents/skills/` 中真实存在的 skill。
 
-## 项目共用 Skills
+## 分层原则
 
-- `arpu-ltv-planning`
-- `balance-audit`
-- `behavior-tree-design`
-- `character-design`
-- `chit-chat-handling`
-- `combat-feel-design`
-- `conflict-resolution`
-- `content-integration`
-- `content-review`
-- `economy-audit`
-- `experience-review`
+为了遵守渐进式披露，优先按下面顺序加载 skill：
+
+1. 基础能力层：检索、参考、计算
+2. 业务执行层：按具体专项调用对应设计 skill
+3. 审查裁决层：仅在需要审查、复核、汇总时调用
+
+## 1. 基础能力层
+
 - `explore`
-- `feedback-design`
-- `formula-design`
-- `gacha-probability-design`
-- `game-decomposition`
-- `growth-curve-simulation`
-- `intent-recognition`
-- `interaction-hierarchy-design`
 - `librarian`
-- `logical-gap-review`
-- `macro-system-planning`
-- `market-audience-analysis`
-- `message-triage`
-- `monetization-audit`
 - `oracle`
-- `pacing-design`
-- `parallel-dispatch`
-- `production-consumption-analysis`
-- `progress-tracking`
-- `retention-design`
-- `review-synthesis`
-- `risk-identification`
-- `rules-design`
-- `schedule-planning`
-- `scriptwriting`
-- `selling-point-extraction`
-- `spatial-flow-design`
-- `standards-gatekeeping`
-- `system-audit`
-- `system-coupling-analysis`
+
+## 2. 业务执行层
+
+### 规划与调度
+- `intent-recognition`
+- `message-triage`
+- `chit-chat-handling`
+- `game-decomposition`
+- `macro-system-planning`
 - `task-allocation-strategy`
-- `trading-mechanism-design`
+- `progress-tracking`
+- `parallel-dispatch`
+- `content-integration`
+- `conflict-resolution`
+
+### 市场与叙事
+- `market-audience-analysis`
+- `selling-point-extraction`
+- `scriptwriting`
+- `character-design`
+
+### 战斗 / 关卡 / 玩法 / 系统 / UX
+- `behavior-tree-design`
+- `combat-feel-design`
+- `spatial-flow-design`
+- `pacing-design`
+- `rules-design`
+- `feedback-design`
+- `system-coupling-analysis`
+- `interaction-hierarchy-design`
 - `usability-analysis`
+
+### 数值 / 商业化 / 经济 / 运营
+- `formula-design`
+- `growth-curve-simulation`
+- `arpu-ltv-planning`
+- `gacha-probability-design`
+- `production-consumption-analysis`
+- `trading-mechanism-design`
+- `schedule-planning`
+- `retention-design`
+
+## 3. 审查裁决层
+
+- `standards-gatekeeping`
+- `logical-gap-review`
+- `risk-identification`
+- `system-audit`
+- `content-review`
+- `experience-review`
+- `balance-audit`
+- `economy-audit`
+- `monetization-audit`
+- `review-synthesis`
+
+## 使用建议
+
+- 默认不要一次性加载全量 skill，先按任务选最小集合
+- 需要事实参考时，先用基础能力层
+- 进入专项设计时，再加载对应业务执行层
+- 只有当方案要审议、验算、复核、汇总时，才进入审查裁决层
