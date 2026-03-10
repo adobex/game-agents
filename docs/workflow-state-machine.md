@@ -74,6 +74,9 @@ dispatched / in_execution / integrating -> blocked -> dispatched / in_execution 
   - 阻塞问题
   - 修订建议
   - 回退目标
+- 若进入修复闭环：
+  - 需标注 `review_round`
+  - 默认遵循 `docs/review-repair-loop.md`
 - 下一状态：回到 `planning`
 
 ### `dispatched`
@@ -229,10 +232,20 @@ dispatched / in_execution / integrating -> blocked -> dispatched / in_execution 
   - 风险与边界
   - 建议下一步
 
+### 修复包
+
+- 来源：`shangshu` / 对应 11 司
+- 必含：
+  - `review_round`
+  - 待修问题列表
+  - 修复边界
+  - 是否建议重审
+
 ## 8. 推荐使用方式
 
 - 需要快速理解流程：先读 `docs/how-to-run-game-agents.md`
 - 需要知道输出格式：再读 `docs/output-templates.md`
+- 需要跑“审查 -> 修复 -> 重审”闭环：读 `docs/review-repair-loop.md`
 - 需要判断“当前卡在哪个状态、该往哪走”：读本文件
 
 本文件回答的是“流程怎么跑、何时回退、谁能推动状态变化”。

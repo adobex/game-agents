@@ -52,6 +52,7 @@
 - `growth-curve-simulation`
 - `arpu-ltv-planning`
 - `gacha-probability-design`
+- `config-table-design`
 - `production-consumption-analysis`
 - `trading-mechanism-design`
 - `schedule-planning`
@@ -69,6 +70,10 @@
 - `economy-audit`
 - `monetization-audit`
 - `review-synthesis`
+
+说明：
+- 上述核心审查 skill 已统一补充 `严重级别参考`、`示例发现`、`不要这样报`
+- 调用顺序建议为：先看检查表，再看判级参考，最后在需要写结论时参考示例发现
 
 ## 使用建议
 

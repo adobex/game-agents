@@ -199,3 +199,8 @@
 ## 下一步流转
 - 回给 `menxia` 或 `shangshu`
 ```
+
+## 补充阅读
+
+- 若专项方案要进一步落成可研发功能文档，继续使用 `docs/feature-design-template.md`
+- 若专项方案涉及大量可配置字段，配合 `skills/config-table-design.md` 一起设计配置表
