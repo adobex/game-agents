@@ -22,12 +22,17 @@
   - 业务执行 skill 已按各 Agent 能力补齐，详见 [技能索引 (skills/README.md)](./skills/README.md)
   - 技能索引已重构为基础能力层 / 业务执行层 / 审查裁决层，便于渐进式披露
   - 已补充配置表设计专项 skill：`config-table-design.md`
+  - 已吸收 H5 原型相关能力：`mobile-control-selection.md`、`h5-prototype-architecture.md`
+  - 已补充发行复盘相关能力：`aso-analysis.md`、`media-buying-pace-analysis.md`、`creative-strategy-analysis.md`、`bidding-strategy-analysis.md`、`competitive-differentiation-analysis.md`
 - `rules/` - **(项目共用)** 存放当前游戏项目的具体设计规则、编码标准等。
   - 现已包含：`review-report-protocol.md`（统一审查上报协议）、`progressive-disclosure.md`（渐进式披露规则）、`agent-spec-contract.md`（Agent 规格契约）
   - 审查协议已增强：支持轮次追踪、争议标记、过期报告剔除与优先修复动作
+  - 已补充 H5 原型边界规则：`h5-prototype-boundary.md`
+  - 已补充市场情报协议：`market-intelligence-protocol.md`
 - `agents/` - 存放具体各类 Agent 的设计草案、Prompt 模板和专有规则。
   - **总控入口**：`taizi/` (太子)
   - **三省大脑**：`zhongshu/` (中书省), `menxia/` (门下省), `shangshu/` (尚书省)
+  - **市场情报支持**：`analyst/` (发行复盘 / 市场情报)
   - **11司执行层**：
     - `positioning/` (定位司)
     - `narrative/` (叙事司)

@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的花园世界 — 发行手段全维度深度复盘</title>
+  <meta name="description" content="基于官网、App Store 页面、行业复盘与广告观察，对《我的花园世界》进行发行手段全维度深度复盘。">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    :root {
+      --midnight: #0a0e1a;
+      --deep: #0f1528;
+      --panel: rgba(15,21,40,0.85);
+      --glow-pink: #ff2d78;
+      --glow-cyan: #00e5ff;
+      --glow-amber: #ffb300;
+      --glow-violet: #b388ff;
+      --glow-green: #69f0ae;
+      --text-primary: #e0e6f0;
+      --text-muted: #7a8ba8;
+      --border: rgba(100,140,200,0.12);
+      --grid: rgba(110,130,170,0.15);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--midnight);
+      font-family: 'Noto Sans SC', sans-serif;
+      overflow-x: hidden;
+      color: var(--text-primary);
+    }
+    ::selection { background: var(--glow-pink); color: #fff; }
+    .font-serif { font-family: 'Noto Serif SC', serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    .bg-midnight { background: var(--midnight); }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+    }
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      z-index: 10000;
+      background: linear-gradient(90deg, var(--glow-pink), var(--glow-cyan), var(--glow-violet));
+      width: 0%;
+      transition: width 0.1s linear;
+      box-shadow: 0 0 12px var(--glow-pink);
+    }
+    .glow-cyan { text-shadow: 0 0 20px rgba(0,229,255,0.5); }
+    .glow-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      border-radius: 12px;
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    }
+    .glow-card:hover {
+      border-color: rgba(0,229,255,0.3);
+      box-shadow: 0 0 40px rgba(0,229,255,0.08);
+      transform: translateY(-2px);
+    }
+    .hero-mesh {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 40%, rgba(255,45,120,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 30%, rgba(0,229,255,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 50% 80%, rgba(179,136,255,0.05) 0%, transparent 50%);
+    }
+    .scanlines::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+      );
+      pointer-events: none;
+    }
+    .section-block {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 100px 24px;
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    .section-block.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .section-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--glow-pink);
+      text-transform: uppercase;
+    }
+    .section-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      line-height: 1.3;
+      background: linear-gradient(135deg, #fff 0%, var(--glow-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .kpi-card {
+      text-align: center;
+      padding: 28px 20px;
+    }
+    .kpi-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .kpi-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .data-table th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--glow-cyan);
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(0,229,255,0.2);
+      text-align: left;
+    }
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      vertical-align: top;
+    }
+    .data-table tr:hover td { background: rgba(0,229,255,0.03); }
+    .tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+    .tag-pink { background: rgba(255,45,120,0.15); color: var(--glow-pink); border: 1px solid rgba(255,45,120,0.3); }
+    .tag-cyan { background: rgba(0,229,255,0.1); color: var(--glow-cyan); border: 1px solid rgba(0,229,255,0.25); }
+    .tag-amber { background: rgba(255,179,0,0.12); color: var(--glow-amber); border: 1px solid rgba(255,179,0,0.3); }
+    .tag-green { background: rgba(105,240,174,0.1); color: var(--glow-green); border: 1px solid rgba(105,240,174,0.25); }
+    .tag-violet { background: rgba(179,136,255,0.14); color: var(--glow-violet); border: 1px solid rgba(179,136,255,0.3); }
+    .neon-divider {
+      height: 1px;
+      border: none;
+      margin: 60px auto;
+      max-width: 900px;
+      background: linear-gradient(90deg, transparent, var(--glow-cyan), transparent);
+      opacity: 0.3;
+    }
+    .insight-box {
+      border-left: 3px solid var(--glow-pink);
+      background: rgba(255,45,120,0.04);
+      padding: 20px 24px;
+      border-radius: 0 8px 8px 0;
+      margin-top: 24px;
+    }
+    .insight-box .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--glow-pink);
+      margin-bottom: 8px;
+    }
+    .chart-box {
+      width: 100%;
+      min-height: 340px;
+      border-radius: 12px;
+      background: rgba(10,14,26,0.6);
+      border: 1px solid var(--border);
+      padding: 8px;
+    }
+    .jump-nav {
+      position: sticky;
+      top: 14px;
+      z-index: 40;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+    .jump-nav-inner {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 14px;
+      background: rgba(10,14,26,0.78);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 16px 34px rgba(0,0,0,0.22);
+    }
+    .jump-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #dce8fa;
+      background: rgba(255,255,255,0.03);
+      text-decoration: none;
+      font-size: 13px;
+      transition: .22s ease;
+    }
+    .jump-link:hover,
+    .jump-link.active {
+      background: rgba(255,45,120,0.12);
+      border-color: rgba(255,45,120,0.32);
+      color: #fff0f7;
+    }
+    .toc-dot .toc-label {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .toc-dot:hover .toc-label,
+    .toc-dot.active .toc-label {
+      opacity: 1;
+    }
+    .toc-dot.active .toc-indicator {
+      border-color: var(--glow-cyan);
+      background: var(--glow-cyan);
+      box-shadow: 0 0 12px rgba(0,229,255,0.45);
+    }
+    .source-list a {
+      color: #8adfff;
+      text-decoration: none;
+    }
+    .source-list a:hover { text-decoration: underline; }
+    @media (max-width: 768px) {
+      .section-block { padding: 64px 16px; }
+      .jump-nav { padding: 0 16px; }
+      .chart-box { min-height: 300px; }
+      .data-table { font-size: 0.75rem; }
+      .data-table th, .data-table td { padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body class="bg-midnight text-slate-200 antialiased">
+  <div id="progress-bar"></div>
+
+  <header class="relative min-h-screen flex items-center justify-center overflow-hidden scanlines">
+    <div class="hero-mesh"></div>
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 60px 60px;"></div>
+
+    <div class="relative z-10 text-center px-6 max-w-5xl mx-auto" id="hero-content">
+      <div class="font-mono text-xs tracking-[0.3em] uppercase mb-6" style="color: var(--glow-cyan);">
+        <span class="inline-block w-8 h-px mr-3 align-middle" style="background: var(--glow-cyan);"></span>
+        Market Intelligence Report
+        <span class="inline-block w-8 h-px ml-3 align-middle" style="background: var(--glow-cyan);"></span>
+      </div>
+
+      <h1 class="font-serif font-black leading-tight mb-6" style="font-size: clamp(2.6rem, 7vw, 5rem);">
+        <span class="block" style="background: linear-gradient(135deg, #ffffff 0%, rgba(0,229,255,0.9) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">我的花园世界</span>
+        <span class="block text-white/70 mt-2" style="font-size: clamp(1rem, 2.5vw, 1.6rem); font-weight: 400;">发行手段全维度深度复盘</span>
+      </h1>
+
+      <p class="text-base max-w-3xl mx-auto leading-relaxed" style="color: var(--text-muted);">
+        观察窗口覆盖 2025H2 至 2026Q1，聚焦中国内地微信小游戏与国内 iOS 市场。<br>
+        这不是一款靠玩法新奇突围的产品，而是一款把“种花得真花”做成获客钩子、传播事件与商业化入口的礼物型经营产品。
+      </p>
+
+      <div class="flex flex-wrap gap-3 justify-center mt-8">
+        <span class="tag tag-pink">女性向种花经营</span>
+        <span class="tag tag-cyan">微信小游戏 / iOS</span>
+        <span class="tag tag-amber">观察窗口：2025H2 - 2026Q1</span>
+        <span class="tag tag-violet">公开信号复盘</span>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-14 max-w-4xl mx-auto">
+        <div class="glow-card kpi-card">
+          <div class="kpi-value" style="color: var(--glow-pink);">Top 1</div>
+          <div class="kpi-label">春节微信畅销峰值</div>
+        </div>
+        <div class="glow-card kpi-card">
+          <div class="kpi-value" style="color: var(--glow-cyan);">1万+</div>
+          <div class="kpi-label">国内累计素材组数</div>
+        </div>
+        <div class="glow-card kpi-card">
+          <div class="kpi-value" style="color: var(--glow-amber);">72%</div>
+          <div class="kpi-label">公开口径视频占比</div>
+        </div>
+        <div class="glow-card kpi-card">
+          <div class="kpi-value" style="color: var(--glow-violet);">真花</div>
+          <div class="kpi-label">核心转化锚点</div>
+        </div>
+      </div>
+
+      <div class="mt-16 animate-bounce">
+        <i class="ph ph-caret-double-down text-2xl" style="color: var(--text-muted);"></i>
+      </div>
+    </div>
+  </header>
+
+  <nav id="toc" class="fixed right-6 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col gap-3 items-end">
+    <a href="#s1" class="toc-dot group flex items-center gap-2">
+      <span class="toc-label font-mono text-[10px] tracking-wider" style="color: var(--text-muted);">01 产品定位</span>
+      <span class="toc-indicator block w-2 h-2 rounded-full border border-slate-600 transition-colors"></span>
+    </a>
+    <a href="#s2" class="toc-dot group flex items-center gap-2">
+      <span class="toc-label font-mono text-[10px] tracking-wider" style="color: var(--text-muted);">02 渠道买量</span>
+      <span class="toc-indicator block w-2 h-2 rounded-full border border-slate-600 transition-colors"></span>
+    </a>
+    <a href="#s3" class="toc-dot group flex items-center gap-2">
+      <span class="toc-label font-mono text-[10px] tracking-wider" style="color: var(--text-muted);">03 素材创意</span>
+      <span class="toc-indicator block w-2 h-2 rounded-full border border-slate-600 transition-colors"></span>
+    </a>
+    <a href="#s4" class="toc-dot group flex items-center gap-2">
+      <span class="toc-label font-mono text-[10px] tracking-wider" style="color: var(--text-muted);">04 出价投放</span>
+      <span class="toc-indicator block w-2 h-2 rounded-full border border-slate-600 transition-colors"></span>
+    </a>
+    <a href="#s5" class="toc-dot group flex items-center gap-2">
+      <span class="toc-label font-mono text-[10px] tracking-wider" style="color: var(--text-muted);">05 竞品差异</span>
+      <span class="toc-indicator block w-2 h-2 rounded-full border border-slate-600 transition-colors"></span>
+    </a>
+    <a href="#s6" class="toc-dot group flex items-center gap-2">
+      <span class="toc-label font-mono text-[10px] tracking-wider" style="color: var(--text-muted);">06 证据台账</span>
+      <span class="toc-indicator block w-2 h-2 rounded-full border border-slate-600 transition-colors"></span>
+    </a>
+    <a href="#s7" class="toc-dot group flex items-center gap-2">
+      <span class="toc-label font-mono text-[10px] tracking-wider" style="color: var(--text-muted);">07 下游转译</span>
+      <span class="toc-indicator block w-2 h-2 rounded-full border border-slate-600 transition-colors"></span>
+    </a>
+    <a href="#s8" class="toc-dot group flex items-center gap-2">
+      <span class="toc-label font-mono text-[10px] tracking-wider" style="color: var(--text-muted);">08 总结</span>
+      <span class="toc-indicator block w-2 h-2 rounded-full border border-slate-600 transition-colors"></span>
+    </a>
+  </nav>
+
+  <nav class="jump-nav">
+    <div class="jump-nav-inner">
+      <a href="#s1" class="jump-link">01 产品定位</a>
+      <a href="#s2" class="jump-link">02 渠道买量</a>
+      <a href="#s3" class="jump-link">03 素材创意</a>
+      <a href="#s4" class="jump-link">04 出价投放</a>
+      <a href="#s5" class="jump-link">05 竞品差异</a>
+      <a href="#s6" class="jump-link">06 证据台账</a>
+      <a href="#s7" class="jump-link">07 下游转译</a>
+      <a href="#s8" class="jump-link">08 总结收束</a>
+    </div>
+  </nav>
+
+  <section id="s1" class="section-block">
+    <div class="section-num mb-3">01 / Product Identity</div>
+    <h2 class="section-title mb-4">产品定位与信息架构</h2>
+    <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 760px;">
+      《我的花园世界》在发行层并没有先讲“经营系统有多丰富”，而是先把一句最容易传播的承诺打出去：
+      <strong class="text-white">玩游戏，收真实花束</strong>。这让它天然具备礼物感、可分享性和现实兑现感。
+    </p>
+
+    <div class="glow-card p-6 md:p-8 mb-8">
+      <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">产品发行演进时间线</h3>
+      <div class="relative">
+        <div class="absolute left-4 top-0 bottom-0 w-px" style="background: linear-gradient(180deg, var(--glow-pink), var(--glow-cyan), var(--glow-violet));"></div>
+        <div class="space-y-8 pl-12">
+          <div class="relative">
+            <div class="absolute -left-[2.15rem] top-1 w-3 h-3 rounded-full" style="background: var(--glow-amber); box-shadow: 0 0 10px var(--glow-amber);"></div>
+            <div class="font-mono text-xs mb-1" style="color: var(--glow-amber);">2025.07 前后</div>
+            <div class="text-sm font-medium text-white">测试期口号预热</div>
+            <div class="text-xs mt-1" style="color: var(--text-muted);">围绕“玩我的花园世界收获真实花束”做前置认知种草，先验证钩子是否成立。</div>
+          </div>
+          <div class="relative">
+            <div class="absolute -left-[2.15rem] top-1 w-3 h-3 rounded-full" style="background: var(--glow-cyan); box-shadow: 0 0 10px var(--glow-cyan);"></div>
+            <div class="font-mono text-xs mb-1" style="color: var(--glow-cyan);">2025.08</div>
+            <div class="text-sm font-medium text-white">国内 iOS 上线验证</div>
+            <div class="text-xs mt-1" style="color: var(--text-muted);">榜单持续走高，说明商店表达、产品承接和商业化深度开始跑通。</div>
+          </div>
+          <div class="relative">
+            <div class="absolute -left-[2.15rem] top-1 w-3 h-3 rounded-full" style="background: var(--glow-pink); box-shadow: 0 0 10px var(--glow-pink);"></div>
+            <div class="font-mono text-xs mb-1" style="color: var(--glow-pink);">2025.09 - 2025.10</div>
+            <div class="text-sm font-medium text-white">微信小游戏爆发</div>
+            <div class="text-xs mt-1" style="color: var(--text-muted);">国庆窗口成为核心放大量级节点，礼赠型心智与节庆消费场景高度重合。</div>
+          </div>
+          <div class="relative">
+            <div class="absolute -left-[2.15rem] top-1 w-3 h-3 rounded-full" style="background: var(--glow-green); box-shadow: 0 0 10px var(--glow-green);"></div>
+            <div class="font-mono text-xs mb-1" style="color: var(--glow-green);">2025Q4 - 2026Q1</div>
+            <div class="text-sm font-medium text-white">稳定运营 + 节点冲高</div>
+            <div class="text-xs mt-1" style="color: var(--text-muted);">持续素材轮换、晒花传播与春节节点叠加，形成更高峰值表现。</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">ASO / 商店层拆解</h3>
+        <table class="data-table">
+          <thead>
+            <tr><th>维度</th><th>观察</th><th>判断</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>标题与描述</td>
+              <td>直接强调“玩游戏收获真实花束”</td>
+              <td>先卖礼物兑现感，再卖经营循环</td>
+            </tr>
+            <tr>
+              <td>品牌背书</td>
+              <td>更新说明中写入杨紫代言</td>
+              <td>把情绪价值再往“可信赖”推进一层</td>
+            </tr>
+            <tr>
+              <td>视觉表达</td>
+              <td>花坊、鲜花、庭园、插花、装扮</td>
+              <td>先传达审美与治愈感，弱化重度经营门槛</td>
+            </tr>
+            <tr>
+              <td>玩法承诺</td>
+              <td>培育、种植、收花、卖花、花坊布置</td>
+              <td>让点击后的用户看到“广告承诺”与“产品体验”存在承接</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">核心转化标签</h3>
+        <div class="flex flex-wrap gap-2 mb-5">
+          <span class="tag tag-pink">种花得真花</span>
+          <span class="tag tag-cyan">女性向经营</span>
+          <span class="tag tag-amber">古风花坊</span>
+          <span class="tag tag-violet">抓马剧情</span>
+          <span class="tag tag-green">换装养成</span>
+          <span class="tag tag-cyan">社交偷花</span>
+        </div>
+        <div class="insight-box">
+          <div class="label">核心洞察</div>
+          <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+            这款产品的关键不在于“种花经营”本身，而在于它把经营结果和现实礼物绑定。相比传统同类只卖轻经营和治愈感，
+            《我的花园世界》先卖的是<strong class="text-white">现实奖励 + 情绪价值 + 可晒单</strong>，这让它的获客记忆点明显更强。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="glow-card p-6 md:p-8">
+      <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">产品结构：礼物型经营复合模型</h3>
+      <div class="chart-box" id="chart-product-structure"></div>
+      <p class="text-xs mt-4 text-center" style="color: var(--text-muted);">
+        相对传统花园经营产品，《我的花园世界》在礼物兑现、节庆适配、社交晒单与商业化深度上更强。
+      </p>
+    </div>
+  </section>
+
+  <hr class="neon-divider">
+
+  <section id="s2" class="section-block">
+    <div class="section-num mb-3">02 / Media Buying & Pace</div>
+    <h2 class="section-title mb-4">渠道与买量节奏</h2>
+    <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 760px;">
+      公开资料显示，它不是一次性爆量，而是“口号预热 → App 验证 → 小游戏爆发 → 节点冲高”的连续爬坡。
+      这种节奏更像一款礼物型消费品，而不是只靠单次买量爆发的超休闲产品。
+    </p>
+
+    <div class="glow-card p-6 md:p-8 mb-8">
+      <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">投放节奏 · 相对强度曲线</h3>
+      <div class="chart-box" id="chart-buying-pace" style="min-height: 400px;"></div>
+      <p class="text-xs mt-4 text-center" style="color: var(--text-muted);">
+        注：为基于公开信号的相对指数，不代表后台真实预算金额。
+      </p>
+    </div>
+
+    <div class="glow-card p-6 md:p-8 mb-8">
+      <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">买量节奏四阶段详解</h3>
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>阶段</th>
+              <th>时间窗口</th>
+              <th>相对量级</th>
+              <th>预算分布</th>
+              <th>策略目标</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="tag tag-amber">预热测试期</span></td>
+              <td class="font-mono text-xs">2025.07 前后</td>
+              <td class="font-mono">低</td>
+              <td class="font-mono" style="color: var(--glow-amber);">~10% - 15%</td>
+              <td>验证“种花得真花”口号能否有效吸量，测试社媒与种子用户反馈。</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-cyan">App 验证期</span></td>
+              <td class="font-mono text-xs">2025.08 - 2025.09</td>
+              <td class="font-mono">中</td>
+              <td class="font-mono" style="color: var(--glow-cyan);">~20% - 25%</td>
+              <td>先看商店页转化、榜单爬升和付费承接，再决定小游戏放大节奏。</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-pink">小游戏爆发期</span></td>
+              <td class="font-mono text-xs">2025.09末 - 2025.10</td>
+              <td class="font-mono">高</td>
+              <td class="font-mono" style="color: var(--glow-pink);">~35% - 40%</td>
+              <td>国庆窗口放大量级，利用“礼赠 / 鲜花 / 轻度消费”场景吃量。</td>
+            </tr>
+            <tr>
+              <td><span class="tag tag-violet">稳定运营期</span></td>
+              <td class="font-mono text-xs">2025Q4 - 2026Q1</td>
+              <td class="font-mono">中高</td>
+              <td class="font-mono" style="color: var(--glow-violet);">~30%</td>
+              <td>持续素材轮换、晒花传播和节庆节点冲高，把高点击钩子转成长线回收。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">流量渠道占比（推测）</h3>
+        <div class="chart-box" id="chart-channel-mix"></div>
+      </div>
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">渠道逻辑</h3>
+        <div class="space-y-4 text-sm" style="color: var(--text-primary);">
+          <div class="flex gap-3">
+            <div class="w-1 rounded-full shrink-0" style="background: var(--glow-cyan);"></div>
+            <div><strong class="text-white">微信小游戏生态</strong><br><span style="color: var(--text-muted);">最适合“点击即玩 + 社交扩散 + 低门槛领取真花”的主阵地，承担规模放量。</span></div>
+          </div>
+          <div class="flex gap-3">
+            <div class="w-1 rounded-full shrink-0" style="background: var(--glow-pink);"></div>
+            <div><strong class="text-white">国内 iOS</strong><br><span style="color: var(--text-muted);">承担更高价值用户和深度付费验证，让“口号”之外的商业化能力被看见。</span></div>
+          </div>
+          <div class="flex gap-3">
+            <div class="w-1 rounded-full shrink-0" style="background: var(--glow-amber);"></div>
+            <div><strong class="text-white">短视频 / 抓马内容触达</strong><br><span style="color: var(--text-muted);">更适合放剧情钩子和前 3 秒冲突素材，负责拉高 CTR 和前置好奇心。</span></div>
+          </div>
+          <div class="flex gap-3">
+            <div class="w-1 rounded-full shrink-0" style="background: var(--glow-green);"></div>
+            <div><strong class="text-white">UGC 晒花与晒单传播</strong><br><span style="color: var(--text-muted);">真花兑现让用户天然愿意晒图，帮助它从纯买量产品变成带口碑扩散能力的产品。</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <div class="label">为什么要这么做？</div>
+      <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+        《我的花园世界》的节奏更像一个<strong class="text-white">“节庆礼赠型”</strong>产品：国庆、春节等节点不仅是线上娱乐高活跃期，
+        也是鲜花与礼物场景更自然被接受的时候。它先用强钩子验证点击，再在这些节点集中放大，能同时吃到情绪消费和节庆传播红利。
+      </p>
+    </div>
+  </section>
+
+  <hr class="neon-divider">
+
+  <section id="s3" class="section-block">
+    <div class="section-num mb-3">03 / Creative Strategy</div>
+    <h2 class="section-title mb-4">素材创意拆解</h2>
+    <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 760px;">
+      它的素材不是围绕“玩法创新”展开，而是围绕<strong class="text-white">现实奖励、女性情绪冲突、经营治愈承接</strong>三层组合。
+      这三层分别对应点击、留存说服和深度回收。
+    </p>
+
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+      <div class="glow-card p-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="background: radial-gradient(circle at top right, rgba(255,45,120,0.15), transparent 70%);"></div>
+        <div class="font-mono text-3xl font-bold mb-3" style="color: var(--glow-pink); opacity: 0.3;">01</div>
+        <h3 class="text-xl font-bold mb-3 text-white">真花利益点</h3>
+        <p class="text-slate-300 leading-7">
+          “种花得真花 / 收获真实花束”负责一眼停住用户，把产品从普通经营游戏切成现实礼物体验。
+        </p>
+      </div>
+      <div class="glow-card p-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="background: radial-gradient(circle at top right, rgba(0,229,255,0.15), transparent 70%);"></div>
+        <div class="font-mono text-3xl font-bold mb-3" style="color: var(--glow-cyan); opacity: 0.3;">02</div>
+        <h3 class="text-xl font-bold mb-3 text-white">抓马剧情开场</h3>
+        <p class="text-slate-300 leading-7">
+          出轨、离婚、带娃创业等元素负责前 3 秒抓停，本质是把女频短剧情绪结构嫁接到买量素材里。
+        </p>
+      </div>
+      <div class="glow-card p-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="background: radial-gradient(circle at top right, rgba(255,179,0,0.15), transparent 70%);"></div>
+        <div class="font-mono text-3xl font-bold mb-3" style="color: var(--glow-amber); opacity: 0.3;">03</div>
+        <h3 class="text-xl font-bold mb-3 text-white">古风花坊经营</h3>
+        <p class="text-slate-300 leading-7">
+          点击后再用种花、插花、花坊装扮与社交偷花做承接，降低“广告很好看但产品不对味”的断层感。
+        </p>
+      </div>
+    </div>
+
+    <div class="glow-card p-6 md:p-8 mb-8">
+      <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">素材矩阵：吸量能力 × 留存质量</h3>
+      <div class="chart-box" id="chart-creative-matrix" style="min-height: 380px;"></div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">素材池结构</h3>
+        <div class="chart-box" id="chart-creative-mix"></div>
+      </div>
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">素材迭代速度</h3>
+        <div class="chart-box" id="chart-creative-iteration" style="min-height: 300px;"></div>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <div class="label">创意策略总结</div>
+      <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+        它不是靠某一条爆款素材吃天下，而是用大素材池持续测试，把<strong class="text-white">“高点击的真花 / 剧情钩子”</strong>
+        和<strong class="text-white">“高说服的经营内容”</strong>拆层管理。这样既能放大声量，又不会让产品承接完全失真。
+      </p>
+    </div>
+  </section>
+
+  <hr class="neon-divider">
+
+  <section id="s4" class="section-block">
+    <div class="section-num mb-3">04 / Bidding & Logic</div>
+    <h2 class="section-title mb-4">出价与投放技术</h2>
+    <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 760px;">
+      没有后台账户和平台优化事件的直接数据，但结合产品入口、商业化深度、素材规模与榜单结果，可以做相对稳妥的技术推断。
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="glow-card p-6 md:p-8">
+        <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">规模与 ROI 的阶段切换</h3>
+        <div class="chart-box" id="chart-bidding-model" style="min-height: 320px;"></div>
+      </div>
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">阶段性出价推测</h3>
+        <table class="data-table">
+          <thead>
+            <tr><th>阶段</th><th>更可能的模式</th><th>逻辑</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>冷启动 / 测试期</td>
+              <td>Lowest Cost / 激活导向</td>
+              <td>先把真花钩子推开，迅速积累初始转化信号。</td>
+            </tr>
+            <tr>
+              <td>验证 / 放量期</td>
+              <td>混合模式</td>
+              <td>一边保证量级，一边筛出真实能承接付费的素材与人群。</td>
+            </tr>
+            <tr>
+              <td>节庆爆发期</td>
+              <td>规模优先 + 回收约束</td>
+              <td>节点窗口短，先吃规模，但不会完全牺牲回收效率。</td>
+            </tr>
+            <tr>
+              <td>稳定期</td>
+              <td>付费 / ROI 导向增强</td>
+              <td>素材池足够大之后，更适合保住利润和榜单质量。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">平台差异化推断</h3>
+        <div class="space-y-4 text-sm" style="color: var(--text-primary);">
+          <div><strong class="text-white">微信小游戏：</strong><span style="color: var(--text-muted);">更偏规模和社交裂变，强调点击即玩与晒花传播。</span></div>
+          <div><strong class="text-white">国内 iOS：</strong><span style="color: var(--text-muted);">更偏高价值承接，适合验证月卡、礼包和抽卡相关深度付费。</span></div>
+          <div><strong class="text-white">短视频入口：</strong><span style="color: var(--text-muted);">更依赖剧情抓停和情绪演绎，负责前端 CTR。</span></div>
+          <div><strong class="text-white">繁中出海：</strong><span style="color: var(--text-muted);">更像对中国逻辑的小范围复制，而不是完全重新建立模型。</span></div>
+        </div>
+      </div>
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">为什么这样判断</h3>
+        <div class="insight-box !mt-0">
+          <div class="label">技术层结论</div>
+          <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+            这不是纯 IAA 超休闲，因为它有很深的资源缺口、月卡、抽卡、花灵、公会等付费结构；但它也不是高门槛中重度，
+            因为小游戏入口要求先把量打起来。最合理的结论是：
+            <strong class="text-white">前期更重规模，中后期逐渐把优化目标拉向付费与 ROI。</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="neon-divider">
+
+  <section id="s5" class="section-block">
+    <div class="section-num mb-3">05 / Competitive Differentiation</div>
+    <h2 class="section-title mb-4">同赛道差异化竞争</h2>
+    <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 760px;">
+      真正的差异化不在底层玩法，而在发行包装。它把传统种花经营升级成了<strong class="text-white">可兑现、可传播、可炫耀</strong>的礼物型消费体验。
+    </p>
+
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+      <div class="glow-card p-6 md:p-8">
+        <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">传统同类 vs 我的花园世界</h3>
+        <div class="chart-box" id="chart-competitive-radar" style="min-height: 420px;"></div>
+      </div>
+      <div class="glow-card p-6 md:p-8">
+        <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">礼物型经营的节点窗口</h3>
+        <div class="chart-box" id="chart-market-window" style="min-height: 420px;"></div>
+      </div>
+    </div>
+
+    <div class="glow-card p-6 md:p-8 mb-8">
+      <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">相对传统经营产品的打法差异</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>传统打法</th><th>《我的花园世界》打法</th><th>带来的结果</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>卖经营循环</td>
+            <td>卖“种花得真花”</td>
+            <td>获客记忆点更强</td>
+          </tr>
+          <tr>
+            <td>卖轻松治愈</td>
+            <td>叠加抓马剧情与女性冲突叙事</td>
+            <td>CTR 更高</td>
+          </tr>
+          <tr>
+            <td>卖数值成长</td>
+            <td>叠加社交偷花、花灵、公会与展示需求</td>
+            <td>长线目标更丰富</td>
+          </tr>
+          <tr>
+            <td>常规礼包变现</td>
+            <td>高密度便利付费 + 抽卡附赠元宝获得感</td>
+            <td>商业化深度更强</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">品牌营销 × 效果广告协同</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+          “真花”不是一句广告话术，而是一个可晒、可验证、可社交扩散的真实体验。再加上代言资源，它形成了
+          “广告点击 → 用户试用 → 收到真花 / 晒单 → 二次传播”的链路，让品牌和效果广告不是分开的两套系统。
+        </p>
+      </div>
+      <div class="glow-card p-6">
+        <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">关键风险</h3>
+        <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+          这套打法的上限很高，但也更依赖供应链、履约、用户预期管理和客服体验。一旦“真花兑现”出现断层，
+          它最强的卖点就会变成最大的反噬来源。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="neon-divider">
+
+  <section id="s6" class="section-block">
+    <div class="section-num mb-3">06 / Evidence Ledger</div>
+    <h2 class="section-title mb-4">证据分级台账</h2>
+    <div class="glow-card p-6">
+      <table class="data-table">
+        <thead>
+          <tr><th>结论</th><th>证据等级</th><th>主要依据</th><th>不确定点</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>核心宣传点是“种花得真花 / 收获真实花束”</td>
+            <td><span class="tag tag-green">A 直接观察</span></td>
+            <td>官网、App Store、GameRes、广大大均直接出现该表述</td>
+            <td>无</td>
+          </tr>
+          <tr>
+            <td>产品明确面向女性向种花经营人群</td>
+            <td><span class="tag tag-green">A 直接观察</span></td>
+            <td>商店文案、剧情设定、换装与花坊经营审美、媒体复盘</td>
+            <td>无</td>
+          </tr>
+          <tr>
+            <td>国庆与春节是关键爆发窗口</td>
+            <td><span class="tag tag-cyan">B 高可信推断</span></td>
+            <td>公开榜单表现、节庆消费心智、媒体报道与节点逻辑</td>
+            <td>缺后台投放日历</td>
+          </tr>
+          <tr>
+            <td>素材核心由真花利益点 + 狗血剧情 + 花坊经营组成</td>
+            <td><span class="tag tag-green">A 直接观察</span></td>
+            <td>GameRes 与广大大对素材和开局剧情的直接描述</td>
+            <td>不同阶段占比会波动</td>
+          </tr>
+          <tr>
+            <td>素材池规模很大，依赖持续高频测试</td>
+            <td><span class="tag tag-green">A 直接观察</span></td>
+            <td>公开文章提到国内累计 1 万组素材，繁中版本视频占比较高</td>
+            <td>口径非后台原始报表</td>
+          </tr>
+          <tr>
+            <td>投放策略可能是前期吃量、中后期吃 ROI 的混合模式</td>
+            <td><span class="tag tag-cyan">B 高可信推断</span></td>
+            <td>小游戏入口、深度商业化、榜单表现与素材规模综合判断</td>
+            <td>无法确认真实优化事件</td>
+          </tr>
+          <tr>
+            <td>具体渠道预算比例和精确 ROI</td>
+            <td><span class="tag tag-pink">C 方向性假设</span></td>
+            <td>只能按行业规律、平台表现与公开信号反推</td>
+            <td>不可当后台事实</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="neon-divider">
+
+  <section id="s7" class="section-block">
+    <div class="section-num mb-3">07 / Downstream Translation</div>
+    <h2 class="section-title mb-4">下游转译</h2>
+    <div class="grid md:grid-cols-3 gap-6 mt-8">
+      <div class="glow-card p-6">
+        <h3 class="text-xl font-bold mb-4 text-white">给 positioning</h3>
+        <ul class="space-y-3 text-slate-300 leading-7">
+          <li><strong class="text-white">可直接采用</strong>：现实奖励 + 情绪价值 + 展示感是极强转化标签。</li>
+          <li><strong class="text-white">需本地化改写</strong>：是否用真花，要看供应链、履约成本与品牌调性。</li>
+          <li><strong class="text-white">仅作参考</strong>：明星代言和具体品牌资源配置。</li>
+        </ul>
+      </div>
+      <div class="glow-card p-6">
+        <h3 class="text-xl font-bold mb-4 text-white">给 liveops</h3>
+        <ul class="space-y-3 text-slate-300 leading-7">
+          <li><strong class="text-white">可直接采用</strong>：节庆节点非常适合礼赠型产品的放量与活动组织。</li>
+          <li><strong class="text-white">需本地化改写</strong>：国庆、春节、妇女节等节点要按内容产能与用户画像重写。</li>
+          <li><strong class="text-white">仅作参考</strong>：竞品的具体冲榜节奏和活动日历。</li>
+        </ul>
+      </div>
+      <div class="glow-card p-6">
+        <h3 class="text-xl font-bold mb-4 text-white">给 monetization</h3>
+        <ul class="space-y-3 text-slate-300 leading-7">
+          <li><strong class="text-white">可直接采用</strong>：情绪包装和获得感增强能显著提升转化。</li>
+          <li><strong class="text-white">需本地化改写</strong>：花灵、抽卡、月卡、资源缺口都要按我方经济重新设计。</li>
+          <li><strong class="text-white">仅作参考</strong>：具体价格带、保底、付费强度和礼包组合。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="neon-divider">
+
+  <section id="s8" class="section-block">
+    <div class="section-num mb-3">CONCLUSION</div>
+    <h2 class="section-title mb-6">总结与前瞻</h2>
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+      <div class="glow-card p-6">
+        <div class="font-mono text-xs tracking-wider mb-3" style="color: var(--glow-pink);">结论 01</div>
+        <h3 class="text-lg font-bold text-white mb-3">它卖的不是种花，而是礼物兑现</h3>
+        <p class="text-sm leading-7" style="color: var(--text-muted);">“真花”把虚拟经营和现实生活打通，让这款产品具备了普通经营产品没有的现实锚点。</p>
+      </div>
+      <div class="glow-card p-6">
+        <div class="font-mono text-xs tracking-wider mb-3" style="color: var(--glow-cyan);">结论 02</div>
+        <h3 class="text-lg font-bold text-white mb-3">它不是单点素材爆款，而是系统化测试</h3>
+        <p class="text-sm leading-7" style="color: var(--text-muted);">大素材池与持续轮换说明它把真花、剧情、经营承接拆成了可组合的创意系统。</p>
+      </div>
+      <div class="glow-card p-6">
+        <div class="font-mono text-xs tracking-wider mb-3" style="color: var(--glow-amber);">结论 03</div>
+        <h3 class="text-lg font-bold text-white mb-3">它的高上限来自强履约依赖</h3>
+        <p class="text-sm leading-7" style="color: var(--text-muted);">同样因为卖点真实，所以供应链、客服和口碑体验也会成为决定上限的核心变量。</p>
+      </div>
+    </div>
+
+    <div class="insight-box">
+      <div class="label">一句话判断</div>
+      <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+        《我的花园世界》证明了一个重要方向：在女性向轻经营赛道里，真正能拉开差距的未必是底层玩法创新，
+        而可能是把一个<strong class="text-white">“本来只存在于线上”的行为，转译成现实可感知的礼物体验</strong>。
+        这也是它最值得下游团队吸收的发行方法论。
+      </p>
+    </div>
+  </section>
+
+  <section class="section-block pt-16">
+    <div class="glow-card p-6 source-list">
+      <div class="section-num mb-3">Sources</div>
+      <h3 class="text-xl font-bold mb-4 text-white">公开来源</h3>
+      <ul class="space-y-3 text-slate-300 leading-7">
+        <li><a href="https://wdhysj.babigame.cn/" target="_blank" rel="noreferrer">我的花园世界官网</a></li>
+        <li><a href="https://apps.apple.com/cn/app/%E6%88%91%E7%9A%84%E8%8A%B1%E5%9B%AD%E4%B8%96%E7%95%8C/id6746321359" target="_blank" rel="noreferrer">App Store 页面</a></li>
+        <li><a href="https://www.gameres.com/916023.html" target="_blank" rel="noreferrer">GameRes：《女性向细分赛道新爆款：我的花园世界》全解析</a></li>
+        <li><a href="https://guangdada.net/blog/my-garden-world-game-ads" target="_blank" rel="noreferrer">广大大：我的花园世界爆了？如何复刻免费鲜花的营销小奇迹</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const progressBar = document.getElementById('progress-bar');
+    const contentSections = Array.from(document.querySelectorAll('section[id^="s"]'));
+    const revealSections = Array.from(document.querySelectorAll('.section-block'));
+    const navLinks = Array.from(document.querySelectorAll('.jump-link, .toc-dot'));
+
+    window.addEventListener('scroll', () => {
+      const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progressBar.style.width = progress + '%';
+    });
+
+    revealSections.forEach(section => {
+      gsap.to(section, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 82%'
+        },
+        onStart: () => section.classList.add('is-visible')
+      });
+    });
+
+    gsap.from('#hero-content', { opacity: 0, y: 30, duration: 1.2, ease: 'power3.out', delay: 0.25 });
+    gsap.from('#hero-content .kpi-card', { opacity: 0, y: 20, stagger: 0.12, duration: 0.7, ease: 'power2.out', delay: 0.75 });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { rootMargin: '-30% 0px -50% 0px', threshold: 0.01 });
+
+    contentSections.forEach(section => observer.observe(section));
+
+    const charts = [];
+    const theme = {
+      pink: '#ff2d78',
+      cyan: '#00e5ff',
+      amber: '#ffb300',
+      violet: '#b388ff',
+      green: '#69f0ae',
+      text: '#e0e6f0',
+      muted: '#7a8ba8',
+      grid: 'rgba(110,130,170,0.15)',
+      font: 'Noto Sans SC, sans-serif',
+      mono: 'JetBrains Mono, monospace',
+      tooltipBg: 'rgba(10,14,26,0.92)'
+    };
+
+    function makeTooltip() {
+      return {
+        backgroundColor: theme.tooltipBg,
+        borderColor: 'rgba(0,229,255,0.2)',
+        borderWidth: 1,
+        textStyle: { color: theme.text, fontFamily: theme.font, fontSize: 12 },
+        padding: [12, 16],
+        extraCssText: 'border-radius:8px; box-shadow:0 4px 24px rgba(0,0,0,0.4);'
+      };
+    }
+
+    function initChart(id, option) {
+      const dom = document.getElementById(id);
+      if (!dom) return null;
+      const chart = echarts.init(dom, null, { renderer: 'svg' });
+      chart.setOption(option);
+      charts.push(chart);
+      ScrollTrigger.create({
+        trigger: dom,
+        start: 'top 90%',
+        once: true,
+        onEnter: () => chart.resize()
+      });
+      return chart;
+    }
+
+    window.addEventListener('resize', () => charts.forEach(chart => chart.resize()));
+
+    initChart('chart-product-structure', {
+      tooltip: { ...makeTooltip(), trigger: 'item' },
+      radar: {
+        indicator: [
+          { name: '礼物兑现', max: 10 },
+          { name: '获客记忆点', max: 10 },
+          { name: '剧情吸量', max: 10 },
+          { name: '社交晒单', max: 10 },
+          { name: '商业化深度', max: 10 },
+          { name: '节庆适配', max: 10 }
+        ],
+        shape: 'polygon',
+        axisName: { color: theme.muted, fontFamily: theme.font, fontSize: 11 },
+        splitLine: { lineStyle: { color: theme.grid } },
+        splitArea: { show: false },
+        axisLine: { lineStyle: { color: theme.grid } }
+      },
+      series: [{
+        type: 'radar',
+        data: [
+          {
+            value: [4, 4, 3, 4, 5, 4],
+            name: '传统花园经营',
+            lineStyle: { color: theme.violet, width: 2 },
+            areaStyle: { color: 'rgba(179,136,255,0.08)' },
+            itemStyle: { color: theme.violet },
+            symbol: 'circle',
+            symbolSize: 5
+          },
+          {
+            value: [10, 9, 8, 8, 9, 9],
+            name: '我的花园世界',
+            lineStyle: { color: theme.pink, width: 2 },
+            areaStyle: { color: 'rgba(255,45,120,0.08)' },
+            itemStyle: { color: theme.pink },
+            symbol: 'circle',
+            symbolSize: 5
+          }
+        ]
+      }],
+      legend: {
+        bottom: 0,
+        textStyle: { color: theme.muted, fontFamily: theme.font, fontSize: 11 },
+        itemWidth: 16,
+        itemHeight: 2
+      }
+    });
+
+    initChart('chart-buying-pace', {
+      tooltip: { ...makeTooltip(), trigger: 'axis' },
+      grid: { left: 50, right: 20, top: 40, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: ['测试预热', 'App 上线', '榜单验证', '国庆窗口', '爆发后回收', '岁末稳定', '春节峰值', '代言放大'],
+        axisLine: { lineStyle: { color: theme.grid } },
+        axisLabel: { color: theme.muted, fontFamily: theme.font, fontSize: 10 },
+        axisTick: { show: false }
+      },
+      yAxis: {
+        type: 'value',
+        name: '相对投放强度指数',
+        nameTextStyle: { color: theme.muted, fontFamily: theme.font, fontSize: 10 },
+        axisLine: { show: false },
+        axisLabel: { color: theme.muted, fontFamily: theme.mono, fontSize: 10 },
+        splitLine: { lineStyle: { color: theme.grid } }
+      },
+      series: [{
+        name: '相对投放强度',
+        type: 'bar',
+        data: [18, 32, 46, 78, 62, 55, 100, 72],
+        itemStyle: {
+          borderRadius: [4, 4, 0, 0],
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: theme.cyan },
+            { offset: 1, color: 'rgba(0,229,255,0.15)' }
+          ])
+        },
+        markLine: {
+          silent: true,
+          data: [
+            { xAxis: '国庆窗口', label: { formatter: '国庆', color: theme.pink, fontSize: 10, fontFamily: theme.font }, lineStyle: { color: theme.pink, type: 'dashed', width: 1 } },
+            { xAxis: '春节峰值', label: { formatter: '春节', color: theme.amber, fontSize: 10, fontFamily: theme.font }, lineStyle: { color: theme.amber, type: 'dashed', width: 1 } }
+          ]
+        }
+      }]
+    });
+
+    initChart('chart-channel-mix', {
+      tooltip: {
+        ...makeTooltip(),
+        trigger: 'item',
+        formatter: function (p) {
+          return '<div style="font-size:13px;color:#fff;font-weight:600">' + p.name + '</div><div style="font-family:JetBrains Mono;font-size:18px;color:' + p.color + ';margin-top:4px">' + p.value + '%</div>';
+        }
+      },
+      series: [{
+        type: 'pie',
+        radius: ['45%', '72%'],
+        center: ['50%', '50%'],
+        avoidLabelOverlap: true,
+        label: {
+          color: theme.muted,
+          fontFamily: theme.font,
+          fontSize: 11,
+          formatter: '{b}\n{d}%'
+        },
+        labelLine: { lineStyle: { color: theme.grid } },
+        itemStyle: { borderColor: 'rgba(10,14,26,0.9)', borderWidth: 3 },
+        emphasis: { itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0,229,255,0.3)' } },
+        data: [
+          { value: 42, name: '微信小游戏生态', itemStyle: { color: theme.cyan } },
+          { value: 24, name: '国内 iOS 承接', itemStyle: { color: theme.pink } },
+          { value: 14, name: '短视频投放', itemStyle: { color: theme.amber } },
+          { value: 12, name: 'UGC / 晒花传播', itemStyle: { color: theme.green } },
+          { value: 8, name: '繁中出海复制', itemStyle: { color: theme.violet } }
+        ]
+      }]
+    });
+
+    initChart('chart-creative-matrix', {
+      tooltip: {
+        ...makeTooltip(),
+        trigger: 'item',
+        formatter: function (p) {
+          return '<div style="font-size:13px;color:#fff;font-weight:600">' + p.data[3] + '</div>' +
+            '<div style="margin-top:6px;font-size:11px;color:#7a8ba8">吸量能力: <span style="color:#fff">' + p.data[0] + '/10</span></div>' +
+            '<div style="font-size:11px;color:#7a8ba8">留存说服: <span style="color:#fff">' + p.data[1] + '/10</span></div>' +
+            '<div style="font-size:11px;color:#7a8ba8">素材占比: <span style="color:#fff">' + p.data[2] + '%</span></div>';
+        }
+      },
+      grid: { left: 55, right: 40, top: 40, bottom: 50 },
+      xAxis: {
+        name: '吸量能力',
+        nameLocation: 'center',
+        nameGap: 30,
+        nameTextStyle: { color: theme.muted, fontFamily: theme.font, fontSize: 11 },
+        min: 4,
+        max: 10,
+        axisLine: { lineStyle: { color: theme.grid } },
+        axisLabel: { color: theme.muted, fontFamily: theme.mono, fontSize: 10 },
+        splitLine: { lineStyle: { color: theme.grid } }
+      },
+      yAxis: {
+        name: '留存说服',
+        nameLocation: 'center',
+        nameGap: 35,
+        nameTextStyle: { color: theme.muted, fontFamily: theme.font, fontSize: 11 },
+        min: 4,
+        max: 10,
+        axisLine: { lineStyle: { color: theme.grid } },
+        axisLabel: { color: theme.muted, fontFamily: theme.mono, fontSize: 10 },
+        splitLine: { lineStyle: { color: theme.grid } }
+      },
+      series: [{
+        type: 'scatter',
+        symbolSize: function (d) { return d[2] * 1.6; },
+        data: [
+          [9.2, 6.1, 38, '真花利益点', theme.pink],
+          [8.5, 5.7, 34, '抓马剧情钩子', theme.cyan],
+          [6.9, 8.3, 28, '花坊经营承接', theme.amber]
+        ],
+        itemStyle: {
+          color: function (p) { return p.data[4]; },
+          shadowBlur: 15,
+          shadowColor: function (p) { return p.data[4] + '40'; }
+        },
+        label: {
+          show: true,
+          position: 'top',
+          formatter: function (p) { return p.data[3]; },
+          color: theme.text,
+          fontFamily: theme.font,
+          fontSize: 11
+        },
+        markLine: {
+          silent: true,
+          lineStyle: { color: theme.grid, type: 'dashed' },
+          data: [{ xAxis: 7 }, { yAxis: 7 }]
+        }
+      }]
+    });
+
+    initChart('chart-creative-mix', {
+      tooltip: { ...makeTooltip(), trigger: 'item' },
+      legend: {
+        bottom: 0,
+        textStyle: { color: theme.muted, fontFamily: theme.font, fontSize: 11 }
+      },
+      series: [{
+        type: 'pie',
+        radius: ['42%', '70%'],
+        center: ['50%', '46%'],
+        padAngle: 2,
+        itemStyle: { borderWidth: 4, borderColor: '#0a0e1a' },
+        label: { color: theme.text, formatter: '{b}\n{d}%' },
+        data: [
+          { value: 40, name: '真花利益点 / 直接转化', itemStyle: { color: theme.pink } },
+          { value: 35, name: '剧情抓马 / 情绪吸量', itemStyle: { color: theme.cyan } },
+          { value: 25, name: '经营承接 / 留存说服', itemStyle: { color: theme.amber } }
+        ]
+      }]
+    });
+
+    initChart('chart-creative-iteration', {
+      tooltip: { ...makeTooltip(), trigger: 'axis' },
+      grid: { left: 40, right: 15, top: 20, bottom: 35 },
+      xAxis: {
+        type: 'category',
+        data: ['W1', 'W2', 'W3', 'W4', 'W5'],
+        axisLine: { lineStyle: { color: theme.grid } },
+        axisLabel: { color: theme.muted, fontFamily: theme.mono, fontSize: 10 },
+        axisTick: { show: false }
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: { show: false },
+        axisLabel: { show: false },
+        splitLine: { lineStyle: { color: theme.grid } }
+      },
+      series: [
+        {
+          name: '新增素材',
+          type: 'bar',
+          stack: 'a',
+          data: [220, 360, 410, 380, 300],
+          itemStyle: { color: theme.cyan, borderRadius: [4, 4, 0, 0] }
+        },
+        {
+          name: '淘汰素材',
+          type: 'bar',
+          stack: 'a',
+          data: [-40, -120, -200, -260, -240],
+          itemStyle: { color: 'rgba(255,45,120,0.5)', borderRadius: [0, 0, 4, 4] }
+        }
+      ],
+      legend: {
+        bottom: 0,
+        textStyle: { color: theme.muted, fontSize: 10, fontFamily: theme.font },
+        itemWidth: 12,
+        itemHeight: 2
+      }
+    });
+
+    initChart('chart-bidding-model', {
+      tooltip: { ...makeTooltip(), trigger: 'axis' },
+      grid: { left: 50, right: 20, top: 30, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: ['测试期', '验证期', '国庆爆发', '稳定期', '春节峰值', '代言期'],
+        axisLine: { lineStyle: { color: theme.grid } },
+        axisLabel: { color: theme.muted, fontFamily: theme.font, fontSize: 10 },
+        axisTick: { show: false }
+      },
+      yAxis: [
+        {
+          type: 'value',
+          name: '规模指数',
+          nameTextStyle: { color: theme.muted, fontSize: 10 },
+          min: 0,
+          max: 100,
+          axisLine: { show: false },
+          axisLabel: { color: theme.muted, fontFamily: theme.mono, fontSize: 10 },
+          splitLine: { lineStyle: { color: theme.grid } }
+        },
+        {
+          type: 'value',
+          name: 'ROI指数',
+          nameTextStyle: { color: theme.muted, fontSize: 10 },
+          min: 0,
+          max: 100,
+          axisLine: { show: false },
+          axisLabel: { color: theme.muted, fontFamily: theme.mono, fontSize: 10 },
+          splitLine: { show: false }
+        }
+      ],
+      series: [
+        {
+          name: '投放规模',
+          type: 'bar',
+          yAxisIndex: 0,
+          data: [20, 42, 76, 58, 95, 68],
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: theme.cyan },
+              { offset: 1, color: 'rgba(0,229,255,0.1)' }
+            ]),
+            borderRadius: [4, 4, 0, 0]
+          }
+        },
+        {
+          name: 'ROI表现',
+          type: 'line',
+          yAxisIndex: 1,
+          data: [22, 38, 61, 70, 88, 74],
+          smooth: true,
+          lineStyle: { color: theme.pink, width: 2 },
+          itemStyle: { color: theme.pink },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(255,45,120,0.15)' },
+              { offset: 1, color: 'transparent' }
+            ])
+          }
+        }
+      ],
+      legend: {
+        bottom: 0,
+        textStyle: { color: theme.muted, fontSize: 10, fontFamily: theme.font },
+        itemWidth: 14,
+        itemHeight: 2
+      }
+    });
+
+    initChart('chart-competitive-radar', {
+      tooltip: { ...makeTooltip(), trigger: 'item' },
+      radar: {
+        indicator: [
+          { name: '礼物兑现', max: 10 },
+          { name: '获客记忆点', max: 10 },
+          { name: '剧情吸量', max: 10 },
+          { name: '社交晒单', max: 10 },
+          { name: '商业化深度', max: 10 },
+          { name: '品牌背书', max: 10 },
+          { name: '长线收集', max: 10 },
+          { name: '节庆适配', max: 10 }
+        ],
+        shape: 'polygon',
+        radius: '65%',
+        axisName: { color: theme.muted, fontFamily: theme.font, fontSize: 11 },
+        splitLine: { lineStyle: { color: theme.grid } },
+        splitArea: { show: false },
+        axisLine: { lineStyle: { color: theme.grid } }
+      },
+      series: [{
+        type: 'radar',
+        data: [
+          {
+            value: [3, 4, 4, 3, 5, 2, 5, 4],
+            name: '传统同类',
+            lineStyle: { color: theme.violet, width: 2 },
+            areaStyle: { color: 'rgba(179,136,255,0.06)' },
+            itemStyle: { color: theme.violet },
+            symbol: 'circle',
+            symbolSize: 4
+          },
+          {
+            value: [10, 9, 8, 8, 9, 7, 8, 9],
+            name: '我的花园世界',
+            lineStyle: { color: theme.pink, width: 2 },
+            areaStyle: { color: 'rgba(255,45,120,0.06)' },
+            itemStyle: { color: theme.pink },
+            symbol: 'circle',
+            symbolSize: 4
+          }
+        ]
+      }],
+      legend: {
+        bottom: 0,
+        textStyle: { color: theme.muted, fontFamily: theme.font, fontSize: 11 },
+        itemWidth: 16,
+        itemHeight: 2
+      }
+    });
+
+    initChart('chart-market-window', {
+      tooltip: { ...makeTooltip(), trigger: 'axis' },
+      grid: { left: 50, right: 30, top: 30, bottom: 50 },
+      xAxis: {
+        type: 'category',
+        data: ['日常', '520', '七夕', '国庆', '双11', '元旦', '春节', '妇女节'],
+        axisLine: { lineStyle: { color: theme.grid } },
+        axisLabel: { color: theme.muted, fontFamily: theme.font, fontSize: 10 },
+        axisTick: { show: false }
+      },
+      yAxis: {
+        type: 'value',
+        name: '节点适配指数',
+        nameTextStyle: { color: theme.muted, fontFamily: theme.font, fontSize: 10 },
+        axisLine: { show: false },
+        axisLabel: { color: theme.muted, fontFamily: theme.mono, fontSize: 10 },
+        splitLine: { lineStyle: { color: theme.grid } }
+      },
+      series: [
+        {
+          name: '礼赠场景强度',
+          type: 'bar',
+          data: [20, 55, 62, 74, 38, 32, 92, 80],
+          itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(179,136,255,0.7)' },
+              { offset: 1, color: 'rgba(179,136,255,0.1)' }
+            ]),
+            borderRadius: [4, 4, 0, 0]
+          }
+        },
+        {
+          name: '产品传播适配度',
+          type: 'line',
+          data: [35, 63, 68, 82, 45, 40, 95, 86],
+          smooth: true,
+          lineStyle: { color: theme.cyan, width: 2 },
+          itemStyle: { color: theme.cyan },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(0,229,255,0.12)' },
+              { offset: 1, color: 'transparent' }
+            ])
+          }
+        }
+      ],
+      legend: {
+        bottom: 0,
+        textStyle: { color: theme.muted, fontSize: 10, fontFamily: theme.font },
+        itemWidth: 14,
+        itemHeight: 2
+      }
+    });
+  </script>
+</body>
+</html>

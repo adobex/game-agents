@@ -33,6 +33,11 @@
 ### 市场与叙事
 - `market-audience-analysis`
 - `selling-point-extraction`
+- `aso-analysis`
+- `media-buying-pace-analysis`
+- `creative-strategy-analysis`
+- `bidding-strategy-analysis`
+- `competitive-differentiation-analysis`
 - `scriptwriting`
 - `character-design`
 
@@ -43,6 +48,8 @@
 - `pacing-design`
 - `rules-design`
 - `feedback-design`
+- `mobile-control-selection`
+- `h5-prototype-architecture`
 - `system-coupling-analysis`
 - `interaction-hierarchy-design`
 - `usability-analysis`
@@ -81,3 +88,4 @@
 - 需要事实参考时，先用基础能力层
 - 进入专项设计时，再加载对应业务执行层
 - 只有当方案要审议、验算、复核、汇总时，才进入审查裁决层
+- 若任务目标是“快速做可试玩 H5 手游原型”，可额外加载 `rules/h5-prototype-boundary.md`

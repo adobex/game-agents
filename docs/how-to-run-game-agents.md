@@ -52,6 +52,7 @@
 
 ### 专项展开阶段
 - 市场、受众、卖点：`positioning`
+- 发行手段、买量、ASO、素材复盘：`analyst`
 - 世界观、剧情、角色：`narrative`
 - 战斗机制、敌兵行为：`combat`
 - 地图拓扑、流程推进：`level`
@@ -94,6 +95,13 @@
 6. `shangshu` 输出《整合奏折》
 7. 对经济与付费部分补 `economy-audit` / `monetization-audit`
 ```
+
+## `analyst` 的典型下游
+
+- 给 `positioning`：转化标签、视觉语言、受众线索、差异化切口
+- 给 `liveops`：节日窗口、放量节奏、节点打法
+- 给 `monetization`：付费包装、抽卡叙事、素材里的转化钩子
+- 使用时遵循 `rules/market-intelligence-protocol.md`
 
 ## 常见误用
 

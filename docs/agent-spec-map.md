@@ -9,6 +9,7 @@
 | `menxia` | 旨意书 + 规划大纲 | 《审议结论》 | 准奏/封驳、阻塞问题、回修建议 | `standards-gatekeeping` `logical-gap-review` |
 | `shangshu` | 准奏方案 + 批注 | 《派工单》/《整合奏折》 | 任务包、依赖表、整合稿 | `parallel-dispatch` `content-integration` |
 | `positioning` | 市场与题材任务包 | 《定位报告》 | 用户画像、竞品对照、卖点 | `librarian` `market-audience-analysis` |
+| `analyst` | 情报任务包 | 《发行复盘报告》 | ASO、渠道节奏、素材、出价、差异化 | `aso-analysis` `media-buying-pace-analysis` |
 | `narrative` | 叙事任务包 | 《叙事方案》 | 世界观、剧情、角色卡 | `explore` `scriptwriting` |
 | `combat` | 战斗任务包 | 《战斗机制方案》 | 战斗闭环、行为树、风险 | `behavior-tree-design` `combat-feel-design` |
 | `level` | 关卡任务包 | 《关卡方案》 | 地图拓扑、资源分布、节奏 | `librarian` `spatial-flow-design` |

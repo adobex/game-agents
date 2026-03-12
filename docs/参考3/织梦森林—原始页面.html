@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>织梦森林 — 发行手段深度复盘</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&family=JetBrains+Mono:wght@300;400;500;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<style>
+:root {
+  --midnight: #0a0e1a;
+  --deep: #0f1528;
+  --panel: rgba(15,21,40,0.85);
+  --glow-pink: #ff2d78;
+  --glow-cyan: #00e5ff;
+  --glow-amber: #ffb300;
+  --glow-violet: #b388ff;
+  --glow-green: #69f0ae;
+  --text-primary: #e0e6f0;
+  --text-muted: #7a8ba8;
+  --border: rgba(100,140,200,0.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--midnight);
+  font-family: 'Noto Sans SC', sans-serif;
+  overflow-x: hidden;
+}
+::selection { background: var(--glow-pink); color: #fff; }
+.font-serif { font-family: 'Noto Serif SC', serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+.bg-midnight { background: var(--midnight); }
+
+/* Noise overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Progress bar */
+#progress-bar {
+  position: fixed; top: 0; left: 0; height: 2px; z-index: 10000;
+  background: linear-gradient(90deg, var(--glow-pink), var(--glow-cyan), var(--glow-violet));
+  width: 0%; transition: width 0.1s linear;
+  box-shadow: 0 0 12px var(--glow-pink);
+}
+
+/* Glow utilities */
+.glow-pink { text-shadow: 0 0 20px rgba(255,45,120,0.5); }
+.glow-cyan { text-shadow: 0 0 20px rgba(0,229,255,0.5); }
+.glow-border { border: 1px solid rgba(0,229,255,0.15); box-shadow: 0 0 30px rgba(0,229,255,0.05); }
+.glow-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.glow-card:hover {
+  border-color: rgba(0,229,255,0.3);
+  box-shadow: 0 0 40px rgba(0,229,255,0.08);
+}
+
+/* Section styling */
+.section-block {
+  max-width: 1100px; margin: 0 auto;
+  padding: 100px 24px;
+  opacity: 0; transform: translateY(40px);
+}
+.section-block.is-visible { opacity: 1; transform: translateY(0); }
+
+/* Heading accents */
+.section-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem; letter-spacing: 0.2em;
+  color: var(--glow-pink);
+  text-transform: uppercase;
+}
+.section-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.3;
+  background: linear-gradient(135deg, #fff 0%, var(--glow-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Table styling */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.data-table th {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--glow-cyan);
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0,229,255,0.2);
+  text-align: left;
+}
+.data-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.data-table tr:hover td { background: rgba(0,229,255,0.03); }
+
+/* Tag pill */
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.05em;
+}
+.tag-pink { background: rgba(255,45,120,0.15); color: var(--glow-pink); border: 1px solid rgba(255,45,120,0.3); }
+.tag-cyan { background: rgba(0,229,255,0.1); color: var(--glow-cyan); border: 1px solid rgba(0,229,255,0.25); }
+.tag-amber { background: rgba(255,179,0,0.12); color: var(--glow-amber); border: 1px solid rgba(255,179,0,0.3); }
+.tag-green { background: rgba(105,240,174,0.1); color: var(--glow-green); border: 1px solid rgba(105,240,174,0.25); }
+
+/* Divider */
+.neon-divider {
+  height: 1px; border: none; margin: 60px 0;
+  background: linear-gradient(90deg, transparent, var(--glow-cyan), transparent);
+  opacity: 0.3;
+}
+
+/* Insight callout */
+.insight-box {
+  border-left: 3px solid var(--glow-pink);
+  background: rgba(255,45,120,0.04);
+  padding: 20px 24px;
+  border-radius: 0 8px 8px 0;
+  margin: 24px 0;
+}
+.insight-box .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--glow-pink);
+  margin-bottom: 8px;
+}
+
+/* Chart containers */
+.chart-box {
+  width: 100%; min-height: 380px;
+  border-radius: 12px;
+  background: rgba(10,14,26,0.6);
+  border: 1px solid var(--border);
+  padding: 8px;
+}
+
+/* Hero mesh gradient */
+.hero-mesh {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 40%, rgba(255,45,120,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 30%, rgba(0,229,255,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 50% 80%, rgba(179,136,255,0.05) 0%, transparent 50%);
+}
+
+/* Scanline effect for hero */
+.scanlines::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* KPI card */
+.kpi-card {
+  text-align: center;
+  padding: 28px 20px;
+}
+.kpi-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  font-weight: 700;
+  line-height: 1;
+}
+.kpi-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-block { padding: 60px 16px; }
+  .chart-box { min-height: 300px; }
+  .data-table { font-size: 0.75rem; }
+  .data-table th, .data-table td { padding: 8px 10px; }
+}
+
+/* Smooth scrolling */
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body class="bg-midnight text-slate-200 antialiased">
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- ====== HERO SECTION ====== -->
+<header class="relative min-h-screen flex items-center justify-center overflow-hidden scanlines">
+  <div class="hero-mesh"></div>
+  <!-- Floating grid lines -->
+  <div class="absolute inset-0 opacity-[0.04]" style="background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px;"></div>
+
+  <div class="relative z-10 text-center px-6 max-w-4xl mx-auto" id="hero-content">
+    <div class="font-mono text-xs tracking-[0.3em] uppercase mb-6" style="color: var(--glow-cyan);">
+      <span class="inline-block w-8 h-px mr-3 align-middle" style="background: var(--glow-cyan);"></span>
+      Market Intelligence Report
+      <span class="inline-block w-8 h-px ml-3 align-middle" style="background: var(--glow-cyan);"></span>
+    </div>
+    <h1 class="font-serif font-black leading-tight mb-6" style="font-size: clamp(2.5rem, 7vw, 5rem);">
+      <span class="block" style="background: linear-gradient(135deg, #ffffff 0%, rgba(0,229,255,0.9) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">织梦森林</span>
+      <span class="block text-white/70 mt-2" style="font-size: clamp(1rem, 2.5vw, 1.6rem); font-weight: 400;">发行手段全维度深度复盘</span>
+    </h1>
+    <p class="text-base max-w-2xl mx-auto leading-relaxed" style="color: var(--text-muted);">
+      三七互娱入局女性向种花赛道，微信小游戏畅销榜第47名<br>
+      2026年2-3月中国微信小游戏市场情报拆解
+    </p>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-14 max-w-3xl mx-auto">
+      <div class="glow-card kpi-card">
+        <div class="kpi-value" style="color: var(--glow-pink);">Top 47</div>
+        <div class="kpi-label">微信畅销榜峰值</div>
+      </div>
+      <div class="glow-card kpi-card">
+        <div class="kpi-value" style="color: var(--glow-cyan);">1000+</div>
+        <div class="kpi-label">日投放素材组数</div>
+      </div>
+      <div class="glow-card kpi-card">
+        <div class="kpi-value" style="color: var(--glow-amber);">+30%</div>
+        <div class="kpi-label">第10周流水涨幅</div>
+      </div>
+      <div class="glow-card kpi-card">
+        <div class="kpi-value" style="color: var(--glow-violet);">Top 8</div>
+        <div class="kpi-label">新游日榜峰值</div>
+      </div>
+    </div>
+
+    <div class="mt-16 animate-bounce">
+      <i class="ph ph-caret-double-down text-2xl" style="color: var(--text-muted);"></i>
+    </div>
+  </div>
+</header>
+
+<!-- ====== FLOATING TOC ====== -->
+<nav id="toc" class="fixed right-6 top-1/2 -translate-y-1/2 z-50 hidden lg:flex flex-col gap-3 items-end">
+  <a href="#s1" class="toc-dot group flex items-center gap-2">
+    <span class="font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style="color: var(--text-muted);">01 产品定位</span>
+    <span class="block w-2 h-2 rounded-full border border-slate-600 group-hover:border-cyan-400 transition-colors"></span>
+  </a>
+  <a href="#s2" class="toc-dot group flex items-center gap-2">
+    <span class="font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style="color: var(--text-muted);">02 渠道买量</span>
+    <span class="block w-2 h-2 rounded-full border border-slate-600 group-hover:border-cyan-400 transition-colors"></span>
+  </a>
+  <a href="#s3" class="toc-dot group flex items-center gap-2">
+    <span class="font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style="color: var(--text-muted);">03 素材创意</span>
+    <span class="block w-2 h-2 rounded-full border border-slate-600 group-hover:border-cyan-400 transition-colors"></span>
+  </a>
+  <a href="#s4" class="toc-dot group flex items-center gap-2">
+    <span class="font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style="color: var(--text-muted);">04 出价投放</span>
+    <span class="block w-2 h-2 rounded-full border border-slate-600 group-hover:border-cyan-400 transition-colors"></span>
+  </a>
+  <a href="#s5" class="toc-dot group flex items-center gap-2">
+    <span class="font-mono text-[10px] tracking-wider opacity-0 group-hover:opacity-100 transition-opacity" style="color: var(--text-muted);">05 竞品差异</span>
+    <span class="block w-2 h-2 rounded-full border border-slate-600 group-hover:border-cyan-400 transition-colors"></span>
+  </a>
+</nav>
+<!-- ====== SECTION 1: PRODUCT IDENTITY ====== -->
+<section id="s1" class="section-block">
+  <div class="section-num mb-3">01 / Product Identity</div>
+  <h2 class="section-title mb-4">产品定位与信息架构</h2>
+  <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 700px;">
+    《织梦森林》由三七互娱发行，原为2023年公测的异世界妖精森林经营养成手游，2025年年中完成小游戏化改造后重新上线微信/抖音双端，定位从传统二次元养成转向"女性向种花+O2O"赛道。
+  </p>
+
+  <!-- Product Evolution Timeline -->
+  <div class="glow-card p-6 md:p-8 mb-8">
+    <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">PRODUCT EVOLUTION TIMELINE</h3>
+    <div class="relative">
+      <div class="absolute left-4 top-0 bottom-0 w-px" style="background: linear-gradient(180deg, var(--glow-pink), var(--glow-cyan), var(--glow-violet));"></div>
+      <div class="space-y-8 pl-12">
+        <div class="relative">
+          <div class="absolute -left-[2.15rem] top-1 w-3 h-3 rounded-full" style="background: var(--glow-pink); box-shadow: 0 0 10px var(--glow-pink);"></div>
+          <div class="font-mono text-xs mb-1" style="color: var(--glow-pink);">2023.09</div>
+          <div class="text-sm font-medium text-white">手游端公测</div>
+          <div class="text-xs mt-1" style="color: var(--text-muted);">异世界妖精森林主题，横屏经营养成，面向泛二次元用户</div>
+        </div>
+        <div class="relative">
+          <div class="absolute -left-[2.15rem] top-1 w-3 h-3 rounded-full" style="background: var(--glow-amber); box-shadow: 0 0 10px var(--glow-amber);"></div>
+          <div class="font-mono text-xs mb-1" style="color: var(--glow-amber);">2025 H1</div>
+          <div class="text-sm font-medium text-white">小游戏化改造</div>
+          <div class="text-xs mt-1" style="color: var(--text-muted);">竖屏适配 / 强化换装系统 / 引入花种稀有度抽卡 / 接入鲜花物流O2O</div>
+        </div>
+        <div class="relative">
+          <div class="absolute -left-[2.15rem] top-1 w-3 h-3 rounded-full" style="background: var(--glow-cyan); box-shadow: 0 0 10px var(--glow-cyan);"></div>
+          <div class="font-mono text-xs mb-1" style="color: var(--glow-cyan);">2026.02.05</div>
+          <div class="text-sm font-medium text-white">小游戏端正式投放</div>
+          <div class="text-xs mt-1" style="color: var(--text-muted);">微信+抖音双端同步买量，素材日投放量逐步走高至1000+组</div>
+        </div>
+        <div class="relative">
+          <div class="absolute -left-[2.15rem] top-1 w-3 h-3 rounded-full" style="background: var(--glow-green); box-shadow: 0 0 10px var(--glow-green);"></div>
+          <div class="font-mono text-xs mb-1" style="color: var(--glow-green);">2026.02-03</div>
+          <div class="text-sm font-medium text-white">稳定运营 · 冲榜阶段</div>
+          <div class="text-xs mt-1" style="color: var(--text-muted);">微信畅销日榜峰值Top 47 / 抖音畅销日榜Top 78 / 新游榜Top 8 / 第10周流水涨幅超30%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASO & Conversion Tags -->
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="glow-card p-6">
+      <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">ASO 策略拆解</h3>
+      <table class="data-table">
+        <thead><tr><th>维度</th><th>策略内容</th></tr></thead>
+        <tbody>
+          <tr><td class="font-medium text-white/90">关键词布局</td><td>种花、养花、送真花、花园经营、换装、女性休闲</td></tr>
+          <tr><td class="font-medium text-white/90">商店描述</td><td>强调"种花得真花"O2O核心卖点，突出二次元画风差异化</td></tr>
+          <tr><td class="font-medium text-white/90">Icon 演变</td><td>从妖精森林奇幻风 → 竖屏花园+美型角色头像，突出女性审美</td></tr>
+          <tr><td class="font-medium text-white/90">截图策略</td><td>首屏展示花圃全景+换装角色，次屏突出"兑换真花"物流截图</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="glow-card p-6">
+      <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">核心转化标签 (Conversion Tags)</h3>
+      <div class="flex flex-wrap gap-2 mb-5">
+        <span class="tag tag-pink">种花送真花</span>
+        <span class="tag tag-cyan">换装养成</span>
+        <span class="tag tag-amber">二次元画风</span>
+        <span class="tag tag-green">休闲经营</span>
+        <span class="tag tag-pink">乙女向剧情</span>
+        <span class="tag tag-cyan">萌宠陪伴</span>
+      </div>
+      <div class="insight-box">
+        <div class="label">核心洞察</div>
+        <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+          区别于竞品《我的花园世界》的古风写实路线，《织梦森林》选择<strong class="text-white">二次元+乙女</strong>的差异化视觉语言，通过"美型男角色送花"构建情感化转化路径，而非单纯的功能利益点（"种花换真花"）。这使其在商店素材层面形成了与赛道先行者的视觉区隔。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Structure -->
+  <div class="glow-card p-6 md:p-8">
+    <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">产品结构：五维复合模型</h3>
+    <div class="chart-box" id="chart-product-structure" style="min-height: 340px;"></div>
+    <p class="text-xs mt-4 text-center" style="color: var(--text-muted);">
+      《织梦森林》升级为"种植+养成+换装+社交+O2O"复合结构，较竞品增加了换装与乙女向养成权重
+    </p>
+  </div>
+</section>
+
+<hr class="neon-divider max-w-4xl mx-auto">
+<!-- ====== SECTION 2: MEDIA BUYING ====== -->
+<section id="s2" class="section-block">
+  <div class="section-num mb-3">02 / Media Buying & Pace</div>
+  <h2 class="section-title mb-4">渠道与买量节奏</h2>
+  <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 700px;">
+    DataEye ADX数据显示，《织梦森林》于2月5日启动投放，采取"渐进爬坡+节点爆破"的经典三七互娱买量节奏，日投放素材峰值突破1000组。
+  </p>
+
+  <!-- Buying Pace Chart -->
+  <div class="glow-card p-6 md:p-8 mb-8">
+    <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">投放节奏 · 三阶段模型</h3>
+    <div class="chart-box" id="chart-buying-pace" style="min-height: 400px;"></div>
+  </div>
+
+  <!-- Phase Breakdown Table -->
+  <div class="glow-card p-6 md:p-8 mb-8">
+    <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">买量节奏三阶段详解</h3>
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>阶段</th>
+            <th>时间窗口</th>
+            <th>日素材量级</th>
+            <th>预算分布</th>
+            <th>策略目标</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag tag-amber">预热测试期</span></td>
+            <td class="font-mono text-xs">2.05 – 2.13</td>
+            <td class="font-mono">100~300组</td>
+            <td class="font-mono" style="color: var(--glow-amber);">~15%</td>
+            <td>素材AB Test、跑通转化漏斗、验证eCPM模型</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-pink">节点爆发期</span></td>
+            <td class="font-mono text-xs">2.14 – 3.08</td>
+            <td class="font-mono">500~1000+组</td>
+            <td class="font-mono" style="color: var(--glow-pink);">~55%</td>
+            <td>情人节+春节尾声+妇女节三连击，吃透节日场景红利</td>
+          </tr>
+          <tr>
+            <td><span class="tag tag-cyan">稳定放量期</span></td>
+            <td class="font-mono text-xs">3.09 – 持续</td>
+            <td class="font-mono">600~800组</td>
+            <td class="font-mono" style="color: var(--glow-cyan);">~30%</td>
+            <td>维持榜单位置、优化ROI、沉淀自然流量占比</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Channel Mix -->
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="glow-card p-6">
+      <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">流量渠道占比（推测）</h3>
+      <div class="chart-box" id="chart-channel-mix" style="min-height: 320px;"></div>
+    </div>
+    <div class="glow-card p-6">
+      <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">渠道策略逻辑</h3>
+      <div class="space-y-4 text-sm" style="color: var(--text-primary);">
+        <div class="flex gap-3">
+          <div class="w-1 rounded-full shrink-0" style="background: var(--glow-cyan);"></div>
+          <div><strong class="text-white">微信广告（腾讯广告）~45%</strong><br><span style="color: var(--text-muted);">作为微信小游戏原生流量入口，具备最高转化效率。通过朋友圈广告、公众号底部、小程序互跳等位置精准触达女性用户。三七互娱作为腾讯广告Top代理商，享有投放优先级与数据回传优势。</span></div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-1 rounded-full shrink-0" style="background: var(--glow-pink);"></div>
+          <div><strong class="text-white">抖音（巨量引擎）~30%</strong><br><span style="color: var(--text-muted);">短视频天然适配种花+换装素材的展示逻辑。抖音小游戏畅销榜峰值Top 78，说明在抖音端同步做了规模化投放，且乙女向剧情素材在抖音女性用户中表现优异。</span></div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-1 rounded-full shrink-0" style="background: var(--glow-amber);"></div>
+          <div><strong class="text-white">快手+SDK广告平台 ~20%</strong><br><span style="color: var(--text-muted);">快手下沉市场女性用户占比高，与种花赛道用户画像高度匹配。SDK网盟（穿山甲、优量汇）用于补量，CPM成本更低。</span></div>
+        </div>
+        <div class="flex gap-3">
+          <div class="w-1 rounded-full shrink-0" style="background: var(--glow-green);"></div>
+          <div><strong class="text-white">自然流量+社交裂变 ~5%</strong><br><span style="color: var(--text-muted);">微信红包封面放送（春节期间已执行）、好友邀请返利、花束赠送社交等机制驱动自然传播。</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="label">为什么要这么做？</div>
+    <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+      三七互娱的买量节奏高度贴合<strong class="text-white">"节日场景型"</strong>消费品逻辑——种花赛道的核心付费转化窗口不是日常，而是<strong class="text-white">情人节、春节、妇女节</strong>等"送花刚需"场景。因此2月5日开投并非偶然，而是精准卡位情人节（2.14）前9天的蓄水期，给系统足够的学习时间完成模型跑通，在2.14当天实现投放效率峰值。后续妇女节（3.8）则作为第二波爆发窗口，形成"双峰"投放曲线。
+    </p>
+  </div>
+</section>
+
+<hr class="neon-divider max-w-4xl mx-auto">
+<!-- ====== SECTION 3: CREATIVE STRATEGY ====== -->
+<section id="s3" class="section-block">
+  <div class="section-num mb-3">03 / Creative Strategy</div>
+  <h2 class="section-title mb-4">素材创意拆解</h2>
+  <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 700px;">
+    DataEye ADX监测显示，《织梦森林》的素材创意围绕三大核心套路展开，形成"情感吸引→萌趣留存→攀比转化"的完整漏斗。
+  </p>
+
+  <!-- Top 3 Creatives -->
+  <div class="grid md:grid-cols-3 gap-6 mb-8">
+    <div class="glow-card p-6 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="background: radial-gradient(circle at top right, rgba(255,45,120,0.15), transparent 70%);"></div>
+      <div class="font-mono text-3xl font-bold mb-3" style="color: var(--glow-pink); opacity: 0.3;">01</div>
+      <h4 class="text-white font-medium mb-2">乙女向送花剧情</h4>
+      <div class="flex gap-1 mb-3">
+        <span class="tag tag-pink">高吸量</span>
+        <span class="tag tag-amber">情感钩子</span>
+      </div>
+      <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
+        美型男角色（多种人设：霸总、温柔学长、病娇少年）向女主角送花的动画剧情。核心钩子是<strong class="text-white/80">"他为你种了一座花园"</strong>的情感叙事。
+      </p>
+      <div class="mt-4 text-xs font-mono" style="color: var(--glow-pink);">
+        占比 ~40% ・ CTR 偏高 ・ 精准女性用户
+      </div>
+    </div>
+
+    <div class="glow-card p-6 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="background: radial-gradient(circle at top right, rgba(0,229,255,0.12), transparent 70%);"></div>
+      <div class="font-mono text-3xl font-bold mb-3" style="color: var(--glow-cyan); opacity: 0.3;">02</div>
+      <h4 class="text-white font-medium mb-2">萌宠养成陪伴</h4>
+      <div class="flex gap-1 mb-3">
+        <span class="tag tag-cyan">泛用户吸量</span>
+        <span class="tag tag-green">高留存</span>
+      </div>
+      <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
+        以萌宠角色为主角，展示养成+陪伴+种花的温馨日常。画面以暖色调为主，强调"治愈系"属性，降低进入门槛。
+      </p>
+      <div class="mt-4 text-xs font-mono" style="color: var(--glow-cyan);">
+        占比 ~30% ・ 留存偏高 ・ 泛休闲用户
+      </div>
+    </div>
+
+    <div class="glow-card p-6 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-20 h-20 rounded-bl-full" style="background: radial-gradient(circle at top right, rgba(255,179,0,0.12), transparent 70%);"></div>
+      <div class="font-mono text-3xl font-bold mb-3" style="color: var(--glow-amber); opacity: 0.3;">03</div>
+      <h4 class="text-white font-medium mb-2">社交对比+时装炫耀</h4>
+      <div class="flex gap-1 mb-3">
+        <span class="tag tag-amber">高转化</span>
+        <span class="tag tag-pink">付费驱动</span>
+      </div>
+      <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
+        通过"闺蜜花园对比"的动画剧情，制造社交攀比张力——"她的花园比你的美10倍"。重点展示精美时装、稀有花种，刺激付费欲望。
+      </p>
+      <div class="mt-4 text-xs font-mono" style="color: var(--glow-amber);">
+        占比 ~30% ・ 付费率偏高 ・ 中重度用户
+      </div>
+    </div>
+  </div>
+
+  <!-- Creative Funnel Chart -->
+  <div class="glow-card p-6 md:p-8 mb-8">
+    <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">素材效能矩阵：吸量 vs 留存 vs 转化</h3>
+    <div class="chart-box" id="chart-creative-matrix" style="min-height: 380px;"></div>
+  </div>
+
+  <!-- Iteration Logic -->
+  <div class="glow-card p-6 md:p-8">
+    <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">素材迭代逻辑</h3>
+    <div class="grid md:grid-cols-2 gap-8">
+      <div>
+        <h4 class="text-sm font-medium text-white mb-3">平衡"高吸量"与"高留存"的方法论</h4>
+        <div class="space-y-3 text-xs leading-relaxed" style="color: var(--text-muted);">
+          <div class="flex gap-3 items-start">
+            <span class="font-mono shrink-0 text-xs px-2 py-0.5 rounded" style="background: rgba(255,45,120,0.15); color: var(--glow-pink);">A</span>
+            <span><strong class="text-white/80">前3秒钩子分离：</strong>乙女剧情素材负责"停留"（Thumb-stop），种花玩法画面负责"说服"（Convince）。前3秒用情感画面拉停，3~10秒切入真实玩法界面，避免"看广告来的用户与实际玩法不符"导致次留崩塌。</span>
+          </div>
+          <div class="flex gap-3 items-start">
+            <span class="font-mono shrink-0 text-xs px-2 py-0.5 rounded" style="background: rgba(0,229,255,0.12); color: var(--glow-cyan);">B</span>
+            <span><strong class="text-white/80">AB组素材并行投放：</strong>同一批投放中，乙女剧情素材（高CTR低留存）与萌宠养成素材（中CTR高留存）按约4:3比例混投，用前者拉量、后者稳质。</span>
+          </div>
+          <div class="flex gap-3 items-start">
+            <span class="font-mono shrink-0 text-xs px-2 py-0.5 rounded" style="background: rgba(255,179,0,0.12); color: var(--glow-amber);">C</span>
+            <span><strong class="text-white/80">节点限定素材冲击波：</strong>情人节/妇女节期间集中上线"社交对比+时装"素材，利用节日消费心理拉高ARPU。平日则回归种花+养成的日常素材。</span>
+          </div>
+          <div class="flex gap-3 items-start">
+            <span class="font-mono shrink-0 text-xs px-2 py-0.5 rounded" style="background: rgba(105,240,174,0.1); color: var(--glow-green);">D</span>
+            <span><strong class="text-white/80">素材衰减周期管理：</strong>单条素材生命周期约5-7天，通过每日上新50~100组素材保持投放池活性。衰减素材中CTR仍在线但CVR下降的，调整落地页后重新投放。</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-sm font-medium text-white mb-3">素材迭代节奏</h4>
+        <div class="chart-box" id="chart-creative-iteration" style="min-height: 280px;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="neon-divider max-w-4xl mx-auto">
+<!-- ====== SECTION 4: BIDDING & LOGIC ====== -->
+<section id="s4" class="section-block">
+  <div class="section-num mb-3">04 / Bidding & Logic</div>
+  <h2 class="section-title mb-4">出价与投放技术</h2>
+  <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 700px;">
+    基于三七互娱的历史投放风格与种花赛道的商业特性，推测《织梦森林》采用分阶段出价策略，在不同生命周期使用不同的优化目标。
+  </p>
+
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="glow-card p-6">
+      <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">出价模式推测</h3>
+      <div class="chart-box" id="chart-bidding-model" style="min-height: 320px;"></div>
+    </div>
+    <div class="glow-card p-6">
+      <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">出价策略逻辑</h3>
+      <div class="space-y-4">
+        <div class="p-4 rounded-lg" style="background: rgba(255,179,0,0.06); border: 1px solid rgba(255,179,0,0.15);">
+          <div class="font-mono text-xs mb-2" style="color: var(--glow-amber);">PHASE 1 — 预热期 (Lowest Cost)</div>
+          <p class="text-xs" style="color: var(--text-muted);">目标：最大化安装量，快速积累样本。以"激活"为优化目标，不设出价上限（Lowest Cost/Auto Bid）。原因：新产品冷启动需要大量转化数据喂给系统模型，此阶段"跑量>ROI"。</p>
+        </div>
+        <div class="p-4 rounded-lg" style="background: rgba(255,45,120,0.05); border: 1px solid rgba(255,45,120,0.15);">
+          <div class="font-mono text-xs mb-2" style="color: var(--glow-pink);">PHASE 2 — 爆发期 (tCPA → tROAS)</div>
+          <p class="text-xs" style="color: var(--text-muted);">目标：拉高付费用户占比。切换至"付费"为优化事件，设定tCPA（目标付费成本）。情人节/妇女节节点进一步切换为tROAS（目标回收），利用节日ARPU飙升拉高整体ROI。</p>
+        </div>
+        <div class="p-4 rounded-lg" style="background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.15);">
+          <div class="font-mono text-xs mb-2" style="color: var(--glow-cyan);">PHASE 3 — 稳定期 (混合出价)</div>
+          <p class="text-xs" style="color: var(--text-muted);">目标：平衡规模与效率。核心计划用tROAS保ROI，补量计划用oCPM Lowest Cost保规模。同时开启"自动版位"扩展至SDK广告位，降低边际成本。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Differentiation -->
+  <div class="glow-card p-6 md:p-8 mb-8">
+    <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">平台差异化投放策略</h3>
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th>微信小游戏端</th>
+            <th>抖音小游戏端</th>
+            <th>快手端</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="font-medium text-white/90">核心版位</td>
+            <td>朋友圈信息流 / 小程序互跳 / 公众号底部</td>
+            <td>推荐页信息流 / 搜索广告</td>
+            <td>发现页信息流 / 直播间贴片</td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">素材偏好</td>
+            <td>竖版15s短视频 + 静态卡片（落地页直跳小游戏）</td>
+            <td>竖版短剧型素材（15-30s乙女剧情）</td>
+            <td>真人解说+游戏画面混剪</td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">用户画像侧重</td>
+            <td>25-45岁女性，一二线城市，有网购习惯</td>
+            <td>18-35岁女性，二三线城市，乙游/换装受众</td>
+            <td>30-50岁女性，三四线城市，休闲用户</td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">优化目标</td>
+            <td>付费ROI优先（微信支付闭环数据回传完善）</td>
+            <td>次留+付费双优化</td>
+            <td>激活量优先（用于拉新补量）</td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">预算占比（推测）</td>
+            <td class="font-mono" style="color: var(--glow-cyan);">~45%</td>
+            <td class="font-mono" style="color: var(--glow-pink);">~30%</td>
+            <td class="font-mono" style="color: var(--glow-amber);">~15%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight-box">
+    <div class="label">关键判断</div>
+    <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+      三七互娱作为国内买量实力最强的厂商之一（2025年小游戏发行商入榜数第一、7款入Top100），其核心优势在于<strong class="text-white">投放系统化与数据回传基建</strong>。在微信生态中，三七与腾讯广告的深度合作使其享有更精准的用户标签回传（如付费金额、LTV预测），这意味着其tROAS出价模型可以比中小团队更早收敛到目标值。这是"资源型竞争"的典型体现——<strong class="text-white">同一条赛道，大厂跑同样的素材，系统模型收敛更快、买量成本更低。</strong>
+    </p>
+  </div>
+</section>
+
+<hr class="neon-divider max-w-4xl mx-auto">
+<!-- ====== SECTION 5: COMPETITIVE DIFFERENTIATION ====== -->
+<section id="s5" class="section-block">
+  <div class="section-num mb-3">05 / Competitive Differentiation</div>
+  <h2 class="section-title mb-4">同赛道差异化竞争</h2>
+  <p class="text-sm leading-relaxed mb-10" style="color: var(--text-muted); max-width: 700px;">
+    种花赛道的标杆产品是麟贝互娱的《我的花园世界》（2月畅销榜冠军），作为后来者，《织梦森林》选择了"侧翼进攻"而非正面硬刚。
+  </p>
+
+  <!-- Competitive Radar -->
+  <div class="glow-card p-6 md:p-8 mb-8">
+    <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">竞品能力雷达对比</h3>
+    <div class="chart-box" id="chart-competitive-radar" style="min-height: 420px;"></div>
+  </div>
+
+  <!-- Head-to-head Table -->
+  <div class="glow-card p-6 md:p-8 mb-8">
+    <h3 class="font-mono text-xs tracking-wider mb-5" style="color: var(--glow-cyan);">核心竞品对比矩阵</h3>
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>维度</th>
+            <th style="color: var(--glow-pink);">我的花园世界（标杆）</th>
+            <th style="color: var(--glow-cyan);">织梦森林（分析对象）</th>
+            <th>差异化判断</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="font-medium text-white/90">开发商</td>
+            <td>厦门麟贝互娱（<10人小团队）</td>
+            <td>三七互娱（A股上市大厂）</td>
+            <td><span class="tag tag-cyan">资源碾压</span></td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">画风定位</td>
+            <td>古风写实 + 女频复仇剧情</td>
+            <td>二次元 + 乙女向美型角色</td>
+            <td><span class="tag tag-pink">审美区隔</span></td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">核心玩法</td>
+            <td>种花+订单+插花（重商业化）</td>
+            <td>种花+换装+养成+抽卡（复合驱动）</td>
+            <td><span class="tag tag-amber">玩法叠加</span></td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">商业模式</td>
+            <td>内购+IAA混变（重度数值付费）</td>
+            <td>内购为主（换装+稀有花种抽卡）</td>
+            <td><span class="tag tag-green">付费点差异</span></td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">O2O履约</td>
+            <td>自建物流履约 / 明星代言人背书</td>
+            <td>接入成熟鲜花电商供应链（三七资源）</td>
+            <td><span class="tag tag-cyan">供应链优势</span></td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">买量能力</td>
+            <td>中等规模 / 院线广告+短视频KOL</td>
+            <td>大规模系统化买量（日1000+素材组）</td>
+            <td><span class="tag tag-pink">量级碾压</span></td>
+          </tr>
+          <tr>
+            <td class="font-medium text-white/90">畅销榜峰值</td>
+            <td class="font-mono" style="color: var(--glow-pink);">Top 1（12天霸榜冠军）</td>
+            <td class="font-mono" style="color: var(--glow-cyan);">Top 47</td>
+            <td><span class="tag tag-amber">先发优势明显</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Innovation Analysis -->
+  <div class="grid md:grid-cols-2 gap-6 mb-8">
+    <div class="glow-card p-6">
+      <h3 class="text-sm font-medium text-white mb-4">「侧翼进攻」的三大创新</h3>
+      <div class="space-y-4 text-xs leading-relaxed" style="color: var(--text-muted);">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-mono text-xs px-2 py-0.5 rounded" style="background: rgba(255,45,120,0.15); color: var(--glow-pink);">1</span>
+            <strong class="text-white text-sm">二次元审美降维打击</strong>
+          </div>
+          <p>当所有种花竞品都在走"古风/写实"路线时，《织梦森林》用二次元乙女画风切入，瞄准的是"乙游女性用户"这一高付费意愿群体。这些用户在《恋与深空》《时空中的绘旅人》中已验证了为"美型角色"付费的习惯，种花+换装不过是另一个消费场景。</p>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-mono text-xs px-2 py-0.5 rounded" style="background: rgba(0,229,255,0.12); color: var(--glow-cyan);">2</span>
+            <strong class="text-white text-sm">抽卡机制注入种花赛道</strong>
+          </div>
+          <p>竞品的商业化以"数值付费"（加速/体力/扩地）为主，《织梦森林》引入了花种稀有度+抽卡体系，这是将二次元游戏的成熟付费模型（角色/卡池/保底）嫁接到种花赛道的首次尝试，理论上可以显著延长LTV。</p>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="font-mono text-xs px-2 py-0.5 rounded" style="background: rgba(255,179,0,0.12); color: var(--glow-amber);">3</span>
+            <strong class="text-white text-sm">换装系统作为第二付费引擎</strong>
+          </div>
+          <p>时装+花种主题绑定形成"双重消费触点"——节日活动中限定花种与限定时装同步上线，用户既要抽花又要买装，ARPU上限显著高于纯种花产品。</p>
+        </div>
+      </div>
+    </div>
+    <div class="glow-card p-6">
+      <h3 class="text-sm font-medium text-white mb-4">品牌营销 × 效果广告的协同</h3>
+      <div class="space-y-4 text-xs leading-relaxed" style="color: var(--text-muted);">
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <i class="ph ph-gift text-sm" style="color: var(--glow-pink);"></i>
+            <strong class="text-white text-sm">微信红包封面 → 社交破圈</strong>
+          </div>
+          <p>春节期间发放品牌红包封面，借微信社交裂变触达非游戏用户。红包封面本身就是一次免费的品牌曝光，接收者点击封面即可跳转小游戏，实现"品牌曝光→用户获取"的零成本闭环。</p>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <i class="ph ph-tiktok-logo text-sm" style="color: var(--glow-cyan);"></i>
+            <strong class="text-white text-sm">短视频KOL/KOC → 内容种草</strong>
+          </div>
+          <p>在抖音、快手投放种花类生活博主的种草视频，以"真花开箱"作为内容钩子。这类UGC内容既是效果广告素材，也是品牌信任背书——"真的能收到花"。</p>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <i class="ph ph-calendar-heart text-sm" style="color: var(--glow-amber);"></i>
+            <strong class="text-white text-sm">节日场景绑定 → O2O送花</strong>
+          </div>
+          <p>情人节、妇女节期间推出"种花送她真花"的主题活动，将游戏行为与现实礼赠场景深度绑定。这不仅是营销活动，更是商业模式本身——O2O履约即产品核心卖点。</p>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 mb-1">
+            <i class="ph ph-users-three text-sm" style="color: var(--glow-green);"></i>
+            <strong class="text-white text-sm">好友邀请+花束赠送 → 社交裂变</strong>
+          </div>
+          <p>微信生态内的好友邀请返利、花束互赠机制，利用女性用户群体中天然的社交传播链（闺蜜/同事/家人）实现低成本获客。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Competitive Landscape Chart -->
+  <div class="glow-card p-6 md:p-8">
+    <h3 class="font-mono text-xs tracking-wider mb-6" style="color: var(--glow-cyan);">赛道竞争格局演进</h3>
+    <div class="chart-box" id="chart-landscape" style="min-height: 380px;"></div>
+    <p class="text-xs mt-4 text-center" style="color: var(--text-muted);">
+      种花赛道正从"黑马驱动"阶段进入"大厂入局"的结构化竞争阶段
+    </p>
+  </div>
+</section>
+
+<hr class="neon-divider max-w-4xl mx-auto">
+<!-- ====== CONCLUSION ====== -->
+<section class="section-block">
+  <div class="section-num mb-3">CONCLUSION</div>
+  <h2 class="section-title mb-6">总结与前瞻</h2>
+
+  <div class="glow-card p-6 md:p-10 mb-8">
+    <div class="grid md:grid-cols-3 gap-8">
+      <div>
+        <div class="font-mono text-xs tracking-wider mb-3" style="color: var(--glow-pink);">WHY THIS MATTERS</div>
+        <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+          《织梦森林》的意义不在于它的畅销榜排名，而在于它代表了<strong class="text-white">大厂系统化能力在新兴品类的快速复制</strong>。三七互娱用"种花得真花"这一已验证模型 + 二次元乙女审美差异化 + 换装/抽卡双引擎商业化，在一个月内完成了从0到Top47的冷启动，验证了大厂在种花赛道的可行性。
+        </p>
+      </div>
+      <div>
+        <div class="font-mono text-xs tracking-wider mb-3" style="color: var(--glow-cyan);">KEY RISKS</div>
+        <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+          赛道买量成本正在快速攀升，素材同质化加剧。"种花送真花"从创新卖点变为行业标配后，用户心智红利消退。《织梦森林》能否长期站稳Top50，取决于<strong class="text-white">内容迭代频率</strong>（新花种/新角色/新剧情）和<strong class="text-white">O2O履约体验</strong>（真花质量、物流速度、用户复购）。
+        </p>
+      </div>
+      <div>
+        <div class="font-mono text-xs tracking-wider mb-3" style="color: var(--glow-amber);">WHAT'S NEXT</div>
+        <p class="text-sm leading-relaxed" style="color: var(--text-primary);">
+          预判后续动作：① 母亲节（5月）将成为下一个投放高峰窗口；② 可能引入明星/虚拟偶像代言强化品牌层；③ 换装系统有望进化为"花艺时装秀"社交玩法，增加UGC传播性；④ 与鲜花品牌的跨界联名（如花点时间、野兽派）可能是提升O2O信任度的路径。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== FOOTER ====== -->
+<footer class="py-12 px-6 text-center" style="border-top: 1px solid var(--border);">
+  <div class="font-mono text-xs tracking-wider mb-2" style="color: var(--text-muted);">MARKET INTELLIGENCE REPORT</div>
+  <div class="text-sm mb-1 font-serif" style="color: var(--text-primary);">织梦森林 — 发行手段全维度深度复盘</div>
+  <div class="text-xs" style="color: var(--text-muted);">分析周期: 2026年2月-3月 · 数据来源: DataEye ADX / GameLook / 17173 / 公开市场信息</div>
+  <div class="text-xs mt-3" style="color: rgba(122,139,168,0.5);">基于公开信息的推测性分析，不构成投资或商业决策建议</div>
+</footer>
+<script>
+// ====== GSAP & SCROLL SETUP ======
+gsap.registerPlugin(ScrollTrigger);
+
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+});
+
+// Section entrance animations
+document.querySelectorAll('.section-block').forEach(el => {
+  gsap.fromTo(el,
+    { opacity: 0, y: 50 },
+    { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out',
+      scrollTrigger: { trigger: el, start: 'top 80%', once: true }
+    }
+  );
+});
+
+// Hero animation
+gsap.from('#hero-content', { opacity: 0, y: 30, duration: 1.2, ease: 'power3.out', delay: 0.3 });
+gsap.from('#hero-content .kpi-card', { opacity: 0, y: 20, stagger: 0.12, duration: 0.7, ease: 'power2.out', delay: 0.8 });
+
+// KPI counter animation
+document.querySelectorAll('.kpi-value').forEach(el => {
+  ScrollTrigger.create({
+    trigger: el, start: 'top 85%', once: true,
+    onEnter: () => el.style.opacity = 1
+  });
+});
+
+// ====== ECHARTS THEME ======
+const thm = {
+  bg: 'transparent',
+  pink: '#ff2d78', cyan: '#00e5ff', amber: '#ffb300', violet: '#b388ff', green: '#69f0ae',
+  muted: '#7a8ba8', grid: 'rgba(100,140,200,0.08)',
+  font: 'Noto Sans SC, JetBrains Mono, sans-serif',
+  tooltipBg: 'rgba(10,14,26,0.92)',
+};
+function makeTooltip() {
+  return {
+    backgroundColor: thm.tooltipBg,
+    borderColor: 'rgba(0,229,255,0.2)',
+    borderWidth: 1,
+    textStyle: { color: '#e0e6f0', fontFamily: thm.font, fontSize: 12 },
+    padding: [12, 16],
+    extraCssText: 'border-radius:8px; box-shadow:0 4px 24px rgba(0,0,0,0.4);'
+  };
+}
+
+// Responsive resize
+const charts = [];
+function initChart(id, opt) {
+  const dom = document.getElementById(id);
+  if (!dom) return null;
+  const c = echarts.init(dom, null, { renderer: 'svg' });
+  c.setOption(opt);
+  charts.push(c);
+  ScrollTrigger.create({
+    trigger: dom, start: 'top 90%', once: true,
+    onEnter: () => c.resize()
+  });
+  return c;
+}
+window.addEventListener('resize', () => charts.forEach(c => c.resize()));
+
+// ====== CHART 1: Product Structure Radar ======
+initChart('chart-product-structure', {
+  tooltip: { ...makeTooltip(), trigger: 'item' },
+  radar: {
+    indicator: [
+      { name: '种植经营', max: 10 }, { name: '角色养成', max: 10 },
+      { name: '换装系统', max: 10 }, { name: '社交互动', max: 10 },
+      { name: 'O2O履约', max: 10 }, { name: '抽卡/收集', max: 10 }
+    ],
+    shape: 'polygon',
+    axisName: { color: thm.muted, fontFamily: thm.font, fontSize: 11 },
+    splitLine: { lineStyle: { color: thm.grid } },
+    splitArea: { show: false },
+    axisLine: { lineStyle: { color: thm.grid } }
+  },
+  series: [{
+    type: 'radar',
+    data: [
+      {
+        value: [8, 4, 3, 5, 7, 2], name: '我的花园世界',
+        lineStyle: { color: thm.pink, width: 2 },
+        areaStyle: { color: 'rgba(255,45,120,0.08)' },
+        itemStyle: { color: thm.pink },
+        symbol: 'circle', symbolSize: 5
+      },
+      {
+        value: [7, 8, 9, 6, 7, 8], name: '织梦森林',
+        lineStyle: { color: thm.cyan, width: 2 },
+        areaStyle: { color: 'rgba(0,229,255,0.08)' },
+        itemStyle: { color: thm.cyan },
+        symbol: 'circle', symbolSize: 5
+      }
+    ]
+  }],
+  legend: {
+    bottom: 0, textStyle: { color: thm.muted, fontFamily: thm.font, fontSize: 11 },
+    itemWidth: 16, itemHeight: 2
+  }
+});
+
+// ====== CHART 2: Buying Pace ======
+initChart('chart-buying-pace', {
+  tooltip: {
+    ...makeTooltip(), trigger: 'axis',
+    formatter: function(p) {
+      let s = '<div style="font-family:JetBrains Mono;font-size:11px;color:#7a8ba8;margin-bottom:6px">' + p[0].axisValue + '</div>';
+      p.forEach(i => {
+        s += '<div style="display:flex;align-items:center;gap:6px;margin:3px 0"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + i.color + '"></span><span style="color:#e0e6f0">' + i.seriesName + ': <strong>' + i.value + '</strong></span></div>';
+      });
+      return s;
+    }
+  },
+  grid: { left: 50, right: 20, top: 40, bottom: 40 },
+  xAxis: {
+    type: 'category',
+    data: ['2/5','2/8','2/11','2/14','2/17','2/20','2/23','2/26','3/1','3/4','3/8','3/11'],
+    axisLine: { lineStyle: { color: thm.grid } },
+    axisLabel: { color: thm.muted, fontFamily: 'JetBrains Mono', fontSize: 10 },
+    axisTick: { show: false }
+  },
+  yAxis: {
+    type: 'value', name: '日素材投放量（组）',
+    nameTextStyle: { color: thm.muted, fontFamily: thm.font, fontSize: 10 },
+    axisLine: { show: false },
+    axisLabel: { color: thm.muted, fontFamily: 'JetBrains Mono', fontSize: 10 },
+    splitLine: { lineStyle: { color: thm.grid } }
+  },
+  series: [{
+    name: '日投放素材组数', type: 'bar',
+    data: [120, 200, 280, 520, 580, 650, 720, 800, 900, 950, 1050, 850],
+    itemStyle: {
+      borderRadius: [4,4,0,0],
+      color: new echarts.graphic.LinearGradient(0,0,0,1,[
+        { offset: 0, color: thm.cyan },
+        { offset: 1, color: 'rgba(0,229,255,0.15)' }
+      ])
+    },
+    markLine: {
+      silent: true,
+      data: [
+        { xAxis: '2/14', label: { formatter: '情人节', color: thm.pink, fontSize: 10, fontFamily: thm.font }, lineStyle: { color: thm.pink, type: 'dashed', width: 1 } },
+        { xAxis: '3/8', label: { formatter: '妇女节', color: thm.amber, fontSize: 10, fontFamily: thm.font }, lineStyle: { color: thm.amber, type: 'dashed', width: 1 } }
+      ]
+    },
+    markArea: {
+      silent: true,
+      data: [
+        [{ xAxis: '2/5', itemStyle: { color: 'rgba(255,179,0,0.04)' } }, { xAxis: '2/11' }],
+        [{ xAxis: '2/14', itemStyle: { color: 'rgba(255,45,120,0.04)' } }, { xAxis: '3/8' }],
+        [{ xAxis: '3/8', itemStyle: { color: 'rgba(0,229,255,0.03)' } }, { xAxis: '3/11' }]
+      ]
+    }
+  }],
+  visualMap: { show: false, type: 'continuous', min: 100, max: 1100, color: [thm.cyan, 'rgba(0,229,255,0.4)'] }
+});
+
+// ====== CHART 3: Channel Mix ======
+initChart('chart-channel-mix', {
+  tooltip: {
+    ...makeTooltip(), trigger: 'item',
+    formatter: function(p) { return '<div style="font-size:13px;color:#fff;font-weight:600">' + p.name + '</div><div style="font-family:JetBrains Mono;font-size:18px;color:' + p.color + ';margin-top:4px">' + p.value + '%</div>'; }
+  },
+  series: [{
+    type: 'pie', radius: ['45%', '72%'], center: ['50%', '50%'],
+    avoidLabelOverlap: true,
+    label: {
+      color: thm.muted, fontFamily: thm.font, fontSize: 11,
+      formatter: '{b}\n{d}%'
+    },
+    labelLine: { lineStyle: { color: thm.grid } },
+    itemStyle: { borderColor: 'rgba(10,14,26,0.9)', borderWidth: 3 },
+    emphasis: { itemStyle: { shadowBlur: 20, shadowColor: 'rgba(0,229,255,0.3)' } },
+    data: [
+      { value: 45, name: '微信广告', itemStyle: { color: thm.cyan } },
+      { value: 30, name: '抖音（巨量引擎）', itemStyle: { color: thm.pink } },
+      { value: 15, name: '快手', itemStyle: { color: thm.amber } },
+      { value: 5, name: 'SDK网盟', itemStyle: { color: thm.violet } },
+      { value: 5, name: '自然/社交裂变', itemStyle: { color: thm.green } }
+    ]
+  }]
+});
+
+// ====== CHART 4: Creative Matrix (Scatter) ======
+initChart('chart-creative-matrix', {
+  tooltip: {
+    ...makeTooltip(), trigger: 'item',
+    formatter: function(p) {
+      return '<div style="font-size:13px;color:#fff;font-weight:600">' + p.data[3] + '</div>' +
+        '<div style="margin-top:6px;font-size:11px;color:#7a8ba8">吸量能力 (CTR): <span style="color:#fff">' + p.data[0] + '/10</span></div>' +
+        '<div style="font-size:11px;color:#7a8ba8">留存质量 (D1): <span style="color:#fff">' + p.data[1] + '/10</span></div>' +
+        '<div style="font-size:11px;color:#7a8ba8">素材占比: <span style="color:#fff">' + p.data[2] + '%</span></div>';
+    }
+  },
+  grid: { left: 55, right: 40, top: 40, bottom: 50 },
+  xAxis: {
+    name: '吸量能力 (CTR)', nameLocation: 'center', nameGap: 30,
+    nameTextStyle: { color: thm.muted, fontFamily: thm.font, fontSize: 11 },
+    min: 4, max: 10,
+    axisLine: { lineStyle: { color: thm.grid } },
+    axisLabel: { color: thm.muted, fontFamily: 'JetBrains Mono', fontSize: 10 },
+    splitLine: { lineStyle: { color: thm.grid } }
+  },
+  yAxis: {
+    name: '留存质量 (D1)', nameLocation: 'center', nameGap: 35,
+    nameTextStyle: { color: thm.muted, fontFamily: thm.font, fontSize: 11 },
+    min: 4, max: 10,
+    axisLine: { lineStyle: { color: thm.grid } },
+    axisLabel: { color: thm.muted, fontFamily: 'JetBrains Mono', fontSize: 10 },
+    splitLine: { lineStyle: { color: thm.grid } }
+  },
+  series: [{
+    type: 'scatter', symbolSize: function(d) { return d[2] * 1.6; },
+    data: [
+      [9, 5.5, 40, '乙女向送花剧情', thm.pink],
+      [6.5, 8.5, 30, '萌宠养成陪伴', thm.cyan],
+      [7, 7, 30, '社交对比+时装', thm.amber]
+    ],
+    itemStyle: {
+      color: function(p) { return p.data[4]; },
+      shadowBlur: 15,
+      shadowColor: function(p) { return p.data[4] + '40'; }
+    },
+    label: {
+      show: true, position: 'top',
+      formatter: function(p) { return p.data[3]; },
+      color: '#e0e6f0', fontFamily: thm.font, fontSize: 11
+    },
+    markLine: {
+      silent: true, lineStyle: { color: thm.grid, type: 'dashed' },
+      data: [
+        { xAxis: 7, label: { show: false } },
+        { yAxis: 7, label: { show: false } }
+      ]
+    }
+  }]
+});
+
+// ====== CHART 5: Creative Iteration ======
+initChart('chart-creative-iteration', {
+  tooltip: { ...makeTooltip(), trigger: 'axis' },
+  grid: { left: 40, right: 15, top: 20, bottom: 35 },
+  xAxis: {
+    type: 'category',
+    data: ['W1','W2','W3','W4','W5'],
+    axisLine: { lineStyle: { color: thm.grid } },
+    axisLabel: { color: thm.muted, fontFamily: 'JetBrains Mono', fontSize: 10 },
+    axisTick: { show: false }
+  },
+  yAxis: {
+    type: 'value',
+    axisLine: { show: false }, axisLabel: { show: false },
+    splitLine: { lineStyle: { color: thm.grid } }
+  },
+  series: [
+    { name: '新增素材', type: 'bar', stack: 'a', data: [350, 500, 420, 380, 450],
+      itemStyle: { color: thm.cyan, borderRadius: [4,4,0,0] } },
+    { name: '淘汰素材', type: 'bar', stack: 'a', data: [-80, -200, -300, -280, -320],
+      itemStyle: { color: 'rgba(255,45,120,0.5)', borderRadius: [0,0,4,4] } }
+  ],
+  legend: { bottom: 0, textStyle: { color: thm.muted, fontSize: 10, fontFamily: thm.font }, itemWidth: 12, itemHeight: 2 }
+});
+
+// ====== CHART 6: Bidding Model ======
+initChart('chart-bidding-model', {
+  tooltip: { ...makeTooltip(), trigger: 'axis' },
+  grid: { left: 50, right: 20, top: 30, bottom: 40 },
+  xAxis: {
+    type: 'category',
+    data: ['预热期\n(W1)', '放量期\n(W2)', '爆发期\n(W3)', '节点峰值\n(W4)', '稳定期\n(W5)'],
+    axisLine: { lineStyle: { color: thm.grid } },
+    axisLabel: { color: thm.muted, fontFamily: thm.font, fontSize: 10 },
+    axisTick: { show: false }
+  },
+  yAxis: [
+    { type: 'value', name: '规模指数', nameTextStyle: { color: thm.muted, fontSize: 10 }, min: 0, max: 100,
+      axisLine: { show: false }, axisLabel: { color: thm.muted, fontFamily: 'JetBrains Mono', fontSize: 10 },
+      splitLine: { lineStyle: { color: thm.grid } } },
+    { type: 'value', name: 'ROI指数', nameTextStyle: { color: thm.muted, fontSize: 10 }, min: 0, max: 100,
+      axisLine: { show: false }, axisLabel: { color: thm.muted, fontFamily: 'JetBrains Mono', fontSize: 10 },
+      splitLine: { show: false } }
+  ],
+  series: [
+    { name: '投放规模', type: 'bar', yAxisIndex: 0, data: [20, 50, 75, 100, 70],
+      itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:thm.cyan},{offset:1,color:'rgba(0,229,255,0.1)'}]), borderRadius: [4,4,0,0] } },
+    { name: 'ROI表现', type: 'line', yAxisIndex: 1, data: [30, 45, 60, 85, 75], smooth: true,
+      lineStyle: { color: thm.pink, width: 2 }, itemStyle: { color: thm.pink },
+      areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(255,45,120,0.15)'},{offset:1,color:'transparent'}]) } }
+  ],
+  legend: { bottom: 0, textStyle: { color: thm.muted, fontSize: 10, fontFamily: thm.font }, itemWidth: 14, itemHeight: 2 }
+});
+
+// ====== CHART 7: Competitive Radar ======
+initChart('chart-competitive-radar', {
+  tooltip: { ...makeTooltip(), trigger: 'item' },
+  radar: {
+    indicator: [
+      { name: '买量规模', max: 10 }, { name: '素材创意力', max: 10 },
+      { name: '商业化深度', max: 10 }, { name: '用户留存', max: 10 },
+      { name: 'O2O履约', max: 10 }, { name: '品牌影响力', max: 10 },
+      { name: '内容迭代', max: 10 }, { name: '社交裂变', max: 10 }
+    ],
+    shape: 'polygon', radius: '65%',
+    axisName: { color: thm.muted, fontFamily: thm.font, fontSize: 11 },
+    splitLine: { lineStyle: { color: thm.grid } },
+    splitArea: { show: false },
+    axisLine: { lineStyle: { color: thm.grid } }
+  },
+  series: [{
+    type: 'radar',
+    data: [
+      { value: [6, 7, 9, 7, 8, 9, 6, 7], name: '我的花园世界',
+        lineStyle: { color: thm.pink, width: 2 }, areaStyle: { color: 'rgba(255,45,120,0.06)' },
+        itemStyle: { color: thm.pink }, symbol: 'circle', symbolSize: 4 },
+      { value: [9, 8, 7, 6, 7, 5, 7, 5], name: '织梦森林',
+        lineStyle: { color: thm.cyan, width: 2 }, areaStyle: { color: 'rgba(0,229,255,0.06)' },
+        itemStyle: { color: thm.cyan }, symbol: 'circle', symbolSize: 4 }
+    ]
+  }],
+  legend: { bottom: 0, textStyle: { color: thm.muted, fontFamily: thm.font, fontSize: 11 }, itemWidth: 16, itemHeight: 2 }
+});
+
+// ====== CHART 8: Landscape Timeline ======
+initChart('chart-landscape', {
+  tooltip: { ...makeTooltip(), trigger: 'axis' },
+  grid: { left: 50, right: 30, top: 30, bottom: 50 },
+  xAxis: {
+    type: 'category',
+    data: ['2025 Q3', '2025 Q4', '2026.01', '2026.02', '2026.03'],
+    axisLine: { lineStyle: { color: thm.grid } },
+    axisLabel: { color: thm.muted, fontFamily: 'JetBrains Mono', fontSize: 10 },
+    axisTick: { show: false }
+  },
+  yAxis: {
+    type: 'value', name: '赛道竞争强度指数',
+    nameTextStyle: { color: thm.muted, fontFamily: thm.font, fontSize: 10 },
+    axisLine: { show: false },
+    axisLabel: { color: thm.muted, fontFamily: 'JetBrains Mono', fontSize: 10 },
+    splitLine: { lineStyle: { color: thm.grid } }
+  },
+  series: [
+    { name: '在投产品数', type: 'bar', data: [3, 6, 10, 18, 25],
+      itemStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(179,136,255,0.7)'},{offset:1,color:'rgba(179,136,255,0.1)'}]), borderRadius: [4,4,0,0] } },
+    { name: '日均总素材量（千组）', type: 'line', data: [0.5, 1.8, 3.5, 8, 12], smooth: true,
+      lineStyle: { color: thm.cyan, width: 2 }, itemStyle: { color: thm.cyan },
+      areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(0,229,255,0.12)'},{offset:1,color:'transparent'}]) } },
+    { name: '头部产品eCPM（元）', type: 'line', data: [35, 48, 55, 72, 85], smooth: true,
+      lineStyle: { color: thm.amber, width: 2, type: 'dashed' }, itemStyle: { color: thm.amber } }
+  ],
+  legend: { bottom: 0, textStyle: { color: thm.muted, fontSize: 10, fontFamily: thm.font }, itemWidth: 14, itemHeight: 2 }
+});
+</script>
+</body>
+</html>
