@@ -11,6 +11,8 @@
   - [AI Tribunal 吸收记录 (ai-tribunal-integration.md)](./docs/ai-tribunal-integration.md)
   - [Agent 规格总览 (agent-spec-map.md)](./docs/agent-spec-map.md)
   - [输出模板 (output-templates.md)](./docs/output-templates.md)
+  - [图表输出策略 (diagram-output-strategy.md)](./docs/diagram-output-strategy.md)
+  - [GDD HTML 输出模式 (gdd-html-patterns.md)](./docs/gdd-html-patterns.md)
   - [功能设计模板 (feature-design-template.md)](./docs/feature-design-template.md)
   - [状态机协议 (workflow-state-machine.md)](./docs/workflow-state-machine.md)
   - [审查修复闭环 (review-repair-loop.md)](./docs/review-repair-loop.md)
@@ -29,6 +31,8 @@
   - 审查协议已增强：支持轮次追踪、争议标记、过期报告剔除与优先修复动作
   - 已补充 H5 原型边界规则：`h5-prototype-boundary.md`
   - 已补充市场情报协议：`market-intelligence-protocol.md`
+- 图表输出已补充“结构层 + 视图层”策略，供下游 Agent 消费与人工阶段确认同时使用
+- GDD / HTML 型输出已补充页面级模式，强调 Hero、章节导航、主循环先行、关键结构直出与 SVG 图表渲染
 - `agents/` - 存放具体各类 Agent 的设计草案、Prompt 模板和专有规则。
   - **总控入口**：`taizi/` (太子)
   - **三省大脑**：`zhongshu/` (中书省), `menxia/` (门下省), `shangshu/` (尚书省)
